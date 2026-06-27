@@ -20,26 +20,44 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
-      width: 100%; height: 100%; overflow: hidden;
+      width: 100%; min-height: 100%; overflow-x: hidden; overflow-y: auto;
       background: var(--shell); color: var(--fg);
       font: 18px/1.5 'PingFang SC', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
       -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     }
-    .deck-shell { position: fixed; inset: 0; overflow: hidden; }
+    .deck-shell {
+      min-height: 100vh;
+      overflow: visible;
+      padding: 32px 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
     .deck-stage {
-      width: 1920px; height: 1080px;
+      width: 1920px; height: auto;
       background: var(--bg);
       position: relative;
-      transform-origin: top left;
-      box-shadow: 0 30px 80px rgba(10, 14, 26, 0.12);
+      transform-origin: top center;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
     }
-    .slide { position: absolute; inset: 0; overflow: hidden; }
-    .slide:not(.active) { display: none !important; }
-    :where(.slide.active) { display: flex; flex-direction: column; }
+    .slide {
+      position: relative;
+      inset: auto;
+      overflow: hidden;
+      width: 1920px;
+      height: 1080px;
+      flex: 0 0 1080px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      box-shadow: 0 28px 72px rgba(10, 14, 26, 0.12);
+    }
 
     .deck-counter {
       position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
-      display: inline-flex; align-items: center; gap: 4px;
+      display: none; align-items: center; gap: 4px;
       background: rgba(10, 14, 26, 0.92); backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       padding: 6px; border-radius: 999px;
@@ -68,9 +86,9 @@
     @media print {
       @page { size: 1920px 1080px; margin: 0; }
       html, body { width: 1920px !important; height: auto !important; overflow: visible !important; background: #fff !important; }
-      .deck-shell { position: static !important; display: block !important; inset: auto !important; }
-      .deck-stage { width: 1920px !important; height: auto !important; transform: none !important; box-shadow: none !important; position: static !important; }
-      .slide { display: flex !important; position: relative !important; inset: auto !important; width: 1920px !important; height: 1080px !important; page-break-after: always; break-after: page; }
+      .deck-shell { position: static !important; display: block !important; inset: auto !important; padding: 0 !important; }
+      .deck-stage { width: 1920px !important; height: auto !important; transform: none !important; zoom: 1 !important; gap: 0 !important; box-shadow: none !important; position: static !important; }
+      .slide { display: flex !important; position: relative !important; inset: auto !important; width: 1920px !important; height: 1080px !important; flex-basis: 1080px !important; box-shadow: none !important; page-break-after: always; break-after: page; }
       .slide:last-child { page-break-after: auto; break-after: auto; }
       .deck-counter, .deck-hint { display: none !important; }
     }
@@ -2554,17 +2572,14 @@
       var idx = 0;
       function fit() {
         var sw = window.innerWidth;
-        var sh = window.innerHeight;
-        var pad = 32;
-        var s = Math.min((sw - pad) / 1920, (sh - pad) / 1080);
+        var pad = 48;
+        var s = Math.min((sw - pad) / 1920, 1);
         if (!isFinite(s) || s <= 0) s = 1;
-        var tx = (sw - 1920 * s) / 2;
-        var ty = (sh - 1080 * s) / 2;
-        stage.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
+        stage.style.transform = 'none';
+        stage.style.zoom = s;
       }
       function pad2(n) { return (n < 10 ? '0' : '') + n; }
       function paint() {
-        slides.forEach(function (el, i) { el.classList.toggle('active', i === idx); });
         if (cur) cur.textContent = pad2(idx + 1);
         if (total) total.textContent = pad2(slides.length);
         if (prev) prev.toggleAttribute('disabled', idx <= 0);
@@ -2573,6 +2588,7 @@
       function go(i) {
         idx = Math.max(0, Math.min(slides.length - 1, i));
         paint();
+        if (slides[idx]) slides[idx].scrollIntoView({ block: 'start', behavior: 'smooth' });
         try { localStorage.setItem(STORE, String(idx)); } catch (_) {}
       }
       function onKey(e) {
