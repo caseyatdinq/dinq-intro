@@ -85,11 +85,11 @@
 
     @media print {
       @page { size: 1920px 1080px; margin: 0; }
-      html, body { width: 1920px !important; height: auto !important; overflow: visible !important; background: #fff !important; }
-      .deck-shell { position: static !important; display: block !important; inset: auto !important; padding: 0 !important; }
-      .deck-stage { width: 1920px !important; height: auto !important; transform: none !important; zoom: 1 !important; gap: 0 !important; box-shadow: none !important; position: static !important; }
-      .slide { display: flex !important; position: relative !important; inset: auto !important; width: 1920px !important; height: 1080px !important; flex-basis: 1080px !important; box-shadow: none !important; page-break-after: always; break-after: page; }
-      .slide:last-child { page-break-after: auto; break-after: auto; }
+      html, body { width: 1920px !important; height: auto !important; min-height: 0 !important; overflow: visible !important; background: #fff !important; }
+      .deck-shell { min-height: 0 !important; position: static !important; display: block !important; inset: auto !important; padding: 0 !important; overflow: visible !important; }
+      .deck-stage { display: block !important; width: 1920px !important; height: auto !important; transform: none !important; zoom: 1 !important; gap: 0 !important; box-shadow: none !important; position: static !important; }
+      .slide { display: flex !important; position: relative !important; inset: auto !important; width: 1920px !important; height: 1080px !important; min-height: 1080px !important; flex-basis: auto !important; margin: 0 !important; box-shadow: none !important; page-break-before: auto; page-break-after: auto; break-before: auto; break-after: auto; break-inside: avoid; }
+      .slide + .slide { page-break-before: always; break-before: page; }
       .deck-counter, .deck-hint { display: none !important; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -2521,7 +2521,7 @@
               <span style="width: 60px; height: 1px; background: var(--accent); display: inline-block;"></span>
               DINQ · 总结与展望
             </div>
-            <h1 class="closing-title">DINQ 重构<br>高端技术人才<span class="accent">寻访体系</span></h1>
+            <h1 class="closing-title">DINQ 重构<br>AI时代人才<span class="accent">寻访体系</span></h1>
             <div class="closing-sub">传统招聘仅依靠简历、关键词筛选候选人；DINQ 将学术论文、开源代码、落地项目、行业人脉等真实技术成果，转化为可检索、可评估、可触达的标准化人才数据。</div>
             <div class="closing-values">
               <div class="value-card">
