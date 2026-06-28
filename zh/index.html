@@ -1,1 +1,2691 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DINQ · AI 原生高精尖人才搜索平台</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --surface-2: #f3f4f6;
+      --fg: #1a1f2e;
+      --fg-strong: #0a0e1a;
+      --muted: #5d6373;
+      --muted-soft: #6b7280;
+      --border: rgba(10, 14, 26, 0.08);
+      --border-strong: rgba(10, 14, 26, 0.16);
+      --accent: #E75A08;
+      --accent-glow: rgba(231, 90, 8, 0.08);
+      --shell: #d8dade;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; min-height: 100%; overflow-x: hidden; overflow-y: auto;
+      background: var(--shell); color: var(--fg);
+      font: 18px/1.5 'PingFang SC', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    .deck-shell {
+      min-height: 100vh;
+      overflow: visible;
+      padding: 32px 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .deck-stage {
+      width: 1920px; height: auto;
+      background: var(--bg);
+      position: relative;
+      transform-origin: top center;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .slide {
+      position: relative;
+      inset: auto;
+      overflow: hidden;
+      width: 1920px;
+      height: 1080px;
+      flex: 0 0 1080px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      box-shadow: 0 28px 72px rgba(10, 14, 26, 0.12);
+    }
 
+    .deck-counter {
+      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+      display: none; align-items: center; gap: 4px;
+      background: rgba(10, 14, 26, 0.92); backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 6px; border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #fff; font: 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.18em; z-index: 1000;
+    }
+    .deck-counter button {
+      width: 44px; height: 44px; background: transparent; color: #fff;
+      border: 0; border-radius: 50%; font-size: 18px; line-height: 1;
+      cursor: pointer; display: grid; place-items: center; transition: background 0.15s;
+    }
+    .deck-counter button:hover { background: rgba(255, 255, 255, 0.12); }
+    .deck-counter button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .deck-counter button[disabled] { opacity: 0.3; cursor: default; }
+    .deck-counter .deck-count { padding: 0 14px; letter-spacing: 0.22em; }
+    .deck-counter .deck-count .total { color: rgba(255, 255, 255, 0.5); }
+    .deck-hint {
+      position: fixed; bottom: 26px; right: 28px;
+      color: rgba(10, 14, 26, 0.45);
+      font: 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      z-index: 999; pointer-events: none;
+    }
+
+    @media print {
+      @page { size: 1920px 1080px; margin: 0; }
+      html, body { width: 1920px !important; height: auto !important; min-height: 0 !important; overflow: visible !important; background: #fff !important; }
+      .deck-shell { min-height: 0 !important; position: static !important; display: block !important; inset: auto !important; padding: 0 !important; overflow: visible !important; }
+      .deck-stage { display: block !important; width: 1920px !important; height: auto !important; transform: none !important; zoom: 1 !important; gap: 0 !important; box-shadow: none !important; position: static !important; }
+      .slide { display: flex !important; position: relative !important; inset: auto !important; width: 1920px !important; height: 1080px !important; min-height: 1080px !important; flex-basis: auto !important; margin: 0 !important; box-shadow: none !important; page-break-before: auto; page-break-after: auto; break-before: auto; break-after: auto; break-inside: avoid; }
+      .slide + .slide { page-break-before: always; break-before: page; }
+      .deck-counter, .deck-hint { display: none !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .deck-counter button { transition: none !important; }
+      .sticker-row *, .logo-sticker { transition: none !important; animation: none !important; }
+      .slide { animation: none !important; }
+    }
+  </style>
+  <style>
+    /* ===== Per-deck styles ===== */
+    .slide {
+      padding: 80px 100px;
+      color: var(--fg);
+      font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+
+    /* Grid background — subtle, Adyen-style */
+    .grid-bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(10,14,26,0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(10,14,26,0.035) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+    }
+
+    /* Corner dots */
+    .corner-dot {
+      position: absolute; width: 8px; height: 8px;
+      background: var(--accent); border-radius: 1px;
+    }
+    .corner-dot.tl { top: 60px; left: 60px; }
+    .corner-dot.tr { top: 60px; right: 60px; }
+    .corner-dot.bl { bottom: 60px; left: 60px; }
+    .corner-dot.br { bottom: 60px; right: 60px; }
+
+    /* Top eyebrow line */
+    .eyebrow {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 16px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .eyebrow-muted {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Slide header pattern */
+    .slide-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+    .slide-head .left { display: flex; flex-direction: column; gap: 12px; }
+    .slide-head .section-num {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+    }
+    .slide-head .right {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      color: var(--muted-soft);
+      text-transform: uppercase;
+    }
+
+    h1.slide-title {
+      font-size: 64px;
+      font-weight: 600;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--fg-strong);
+      max-width: 1400px;
+    }
+    h2.slide-subtitle {
+      font-size: 22px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--muted);
+      margin-top: 20px;
+      max-width: 1100px;
+    }
+
+    /* ===== Cover slide ===== */
+    .s-cover {
+      padding: 0;
+      background: var(--bg);
+    }
+    .s-cover .cover-inner {
+      position: relative; flex: 1; padding: 100px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      background: var(--surface);
+    }
+    .s-cover .cover-top {
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 14px; letter-spacing: 0.22em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .s-cover .cover-logo {
+      font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+      font-size: 32px; font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--fg-strong);
+    }
+    .s-cover .cover-logo .dot { color: var(--accent); }
+    .s-cover .cover-main {
+      display: flex; flex-direction: column; gap: 40px;
+    }
+    .s-cover .cover-eyebrow {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 18px; letter-spacing: 0.22em;
+      color: var(--accent);
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 18px;
+    }
+    .s-cover .cover-eyebrow::before {
+      content: ''; width: 60px; height: 1px; background: var(--accent);
+    }
+    .s-cover h1.cover-title {
+      font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+      font-size: 132px; font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: -0.035em;
+      color: var(--fg-strong);
+      max-width: 1500px;
+    }
+    .s-cover h1.cover-title .accent { color: var(--accent); }
+    .s-cover .cover-sub {
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 1.4;
+      color: var(--muted);
+      max-width: 1100px;
+    }
+    .s-cover .cover-foot {
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .s-cover .cover-tagline {
+      max-width: 700px;
+      font-size: 18px; line-height: 1.6; color: var(--muted);
+      border-left: 2px solid var(--accent);
+      padding-left: 22px;
+    }
+    .s-cover .cover-meta {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px; letter-spacing: 0.2em;
+      color: var(--muted-soft); text-align: right;
+      line-height: 2;
+      text-transform: uppercase;
+    }
+
+    /* ===== Section divider ===== */
+    .s-section {
+      padding: 0;
+      background: var(--surface-2);
+    }
+    .s-section .section-inner {
+      position: relative; flex: 1; padding: 100px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .s-section .section-top {
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 14px; letter-spacing: 0.22em;
+      color: var(--muted); text-transform: uppercase;
+    }
+    .s-section .section-main {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 80px; align-items: end;
+    }
+    .s-section .section-text { display: flex; flex-direction: column; gap: 32px; }
+    .s-section .section-eyebrow {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 18px; letter-spacing: 0.22em;
+      color: var(--accent); text-transform: uppercase;
+      display: flex; align-items: center; gap: 18px;
+    }
+    .s-section .section-eyebrow::before {
+      content: ''; width: 60px; height: 1px; background: var(--accent);
+    }
+    .s-section h2.section-title {
+      font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+      font-size: 110px; font-weight: 700;
+      line-height: 0.95; letter-spacing: -0.03em;
+      color: var(--fg-strong); max-width: 1200px;
+    }
+    .s-section .section-desc {
+      font-size: 22px; line-height: 1.55; color: var(--muted);
+      max-width: 720px; margin-top: 8px;
+    }
+    .s-section .section-num-box {
+      width: 480px; height: 480px;
+      border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+      font-size: 360px; font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      position: relative;
+    }
+    .s-section .section-num-box::before,
+    .s-section .section-num-box::after {
+      content: ''; position: absolute;
+      width: 12px; height: 12px; background: var(--accent);
+    }
+    .s-section .section-num-box::before { top: -6px; left: -6px; }
+    .s-section .section-num-box::after { bottom: -6px; right: -6px; }
+    .s-section .section-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 32px; border-top: 1px solid var(--border);
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 14px; letter-spacing: 0.2em;
+      color: var(--muted-soft); text-transform: uppercase;
+    }
+
+    /* ===== Content layouts ===== */
+    .s-content { display: flex; flex-direction: column; }
+    .s-content .body { flex: 1; }
+
+    /* Two column: text left, screenshot/list right */
+    .col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+    .col-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 80px; }
+    .col-2-7-5 { display: grid; grid-template-columns: 7fr 5fr; gap: 80px; }
+    .col-2-5-7 { display: grid; grid-template-columns: 5fr 7fr; gap: 80px; }
+
+    /* Lead paragraph */
+    .lead {
+      font-size: 26px; line-height: 1.5;
+      color: var(--fg);
+      max-width: 1100px;
+      font-weight: 400;
+    }
+    .lead .accent { color: var(--accent); font-weight: 500; }
+
+    /* Bullet list — Adyen style */
+    ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 28px; }
+    ul.bullets li {
+      display: grid; grid-template-columns: 48px 1fr;
+      gap: 8px; align-items: start;
+      font-size: 24px; line-height: 1.5;
+      color: var(--fg);
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    ul.bullets li:last-child { border-bottom: 0; }
+    ul.bullets li .num {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 14px; letter-spacing: 0.1em;
+      color: var(--accent); padding-top: 8px;
+      font-weight: 500;
+    }
+    ul.bullets li .txt strong {
+      font-weight: 600; color: var(--fg-strong);
+      display: block; margin-bottom: 6px;
+      font-size: 24px;
+    }
+    ul.bullets li .txt span {
+      color: var(--muted); font-size: 20px;
+    }
+
+    /* Plus-icon bullet (Adyen variant) */
+    ul.plus-bullets { list-style: none; display: flex; flex-direction: column; gap: 24px; }
+    ul.plus-bullets li {
+      display: grid; grid-template-columns: 40px 1fr;
+      gap: 16px; align-items: start;
+      font-size: 22px; line-height: 1.5;
+      color: var(--fg);
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    ul.plus-bullets li:last-child { border-bottom: 0; padding-bottom: 0; }
+    ul.plus-bullets li::before {
+      content: '';
+      width: 32px; height: 32px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      background-image:
+        linear-gradient(to right, var(--accent) 50%, transparent 50%),
+        linear-gradient(to bottom, var(--accent) 50%, transparent 50%);
+      background-size: 12px 1.5px, 1.5px 12px;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin-top: 4px;
+    }
+    ul.plus-bullets li strong {
+      font-weight: 600; color: var(--fg-strong);
+    }
+
+    /* Upgrade diagram — three-column cards with before → after */
+    .upgrade-diagram {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px;
+      margin-top: 18px;
+      align-items: stretch;
+    }
+    .upgrade-item {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.86)),
+        radial-gradient(circle at 100% 0%, rgba(231, 90, 8, 0.08), transparent 42%);
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 20px;
+      padding: 34px 34px 30px;
+      min-height: 338px;
+      display: flex; flex-direction: column; gap: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 22px 56px rgba(10, 14, 26, 0.07);
+    }
+    .upgrade-item::before {
+      content: '';
+      position: absolute; inset: 0 0 auto 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--accent) 0%, rgba(231, 90, 8, 0.52) 58%, rgba(231, 90, 8, 0.08) 100%);
+    }
+    .upg-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .upg-label {
+      font-size: 28px; color: var(--fg-strong);
+      font-weight: 720; letter-spacing: 0;
+    }
+    .upg-num {
+      width: 54px; height: 54px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: rgba(231, 90, 8, 0.08);
+      color: var(--accent);
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 19px; font-weight: 760;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(231, 90, 8, 0.08);
+    }
+    .upg-row {
+      display: grid; grid-template-columns: 1fr;
+      align-items: stretch; gap: 10px;
+    }
+    .upg-before {
+      min-height: 70px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 21px; line-height: 1.35; color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-color: rgba(0,0,0,0.15);
+      padding: 17px 18px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      background: rgba(248, 249, 251, 0.92);
+      border-radius: 14px;
+    }
+    .upg-before svg { flex-shrink: 0; }
+    .upg-divider {
+      width: 100%; height: 34px;
+      background: transparent;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .upg-divider::after {
+      content: '→';
+      position: static;
+      width: 42px; height: 30px;
+      display: grid; place-items: center;
+      background: rgba(231, 90, 8, 0.08);
+      border: 1px solid rgba(231, 90, 8, 0.16);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 24px; font-weight: 760;
+    }
+    .upg-after {
+      min-height: 88px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 25px; font-weight: 760; line-height: 1.32;
+      color: var(--fg-strong);
+      padding: 19px 20px;
+      border: 1px solid rgba(231, 90, 8, 0.24);
+      background:
+        linear-gradient(135deg, rgba(255, 246, 241, 0.96), rgba(255, 255, 255, 0.92));
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8), 0 12px 26px rgba(231, 90, 8, 0.06);
+    }
+    .upg-after svg { flex-shrink: 0; }
+    .upg-mini {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-top: auto;
+      padding-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.2;
+    }
+    .upg-mini span {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 76px; height: 32px;
+      padding: 0 12px;
+      border: 1px solid rgba(15, 23, 42, 0.09);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.76);
+      font-weight: 620;
+      color: var(--fg);
+    }
+    .upg-mini i {
+      width: 16px; height: 1px; background: rgba(231, 90, 8, 0.32);
+      display: inline-block;
+    }
+    /* Stat card */
+    .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+    .stat-card {
+      border: 1px solid var(--border-strong);
+      padding: 36px 32px;
+      position: relative;
+      background: var(--surface);
+    }
+    .stat-card .stat-label {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px; letter-spacing: 0.18em;
+      color: var(--muted); text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .stat-card .stat-num {
+      font-family: 'SF Pro Display', -apple-system, system-ui, sans-serif;
+      font-size: 72px; font-weight: 700;
+      color: var(--fg-strong);
+      letter-spacing: -0.025em; line-height: 1;
+      margin-bottom: 16px;
+    }
+    .stat-card .stat-num .accent { color: var(--accent); }
+    .stat-card .stat-unit {
+      font-size: 32px; color: var(--muted);
+      font-weight: 400;
+      margin-left: 4px;
+    }
+    .stat-card .stat-desc {
+      font-size: 16px; line-height: 1.5; color: var(--muted);
+      margin-top: 8px;
+    }
+    .stat-card .stat-arrow {
+      position: absolute; top: 32px; right: 32px;
+      color: var(--accent); font-size: 18px;
+    }
+
+    /* Module card grid (4-5 cards) */
+    .module-grid {
+      display: grid; gap: 24px;
+    }
+    .module-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .module-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .module-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+    .module-card {
+      border: 1px solid var(--border-strong);
+      padding: 32px 28px;
+      background: var(--surface);
+      display: flex; flex-direction: column; gap: 16px;
+      position: relative;
+      min-height: 280px;
+    }
+    .module-card .mod-num {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 12px; letter-spacing: 0.18em;
+      color: var(--accent); text-transform: uppercase;
+    }
+    .module-card .mod-name {
+      font-size: 24px; font-weight: 600;
+      color: var(--fg-strong);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .module-card .mod-name .en {
+      display: block; font-size: 14px; font-weight: 400;
+      color: var(--muted); margin-top: 4px;
+      letter-spacing: 0.06em;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      text-transform: uppercase;
+    }
+    .module-card .mod-desc {
+      font-size: 15px; line-height: 1.55;
+      color: var(--muted);
+      flex: 1;
+    }
+    .module-card .mod-arrow {
+      color: var(--accent); font-size: 16px;
+    }
+
+    /* Comparison table */
+    table.compare {
+      width: 100%; border-collapse: collapse;
+      font-size: 18px; line-height: 1.5;
+    }
+    table.compare th, table.compare td {
+      text-align: left; padding: 22px 24px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    table.compare th {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px; letter-spacing: 0.16em;
+      color: var(--muted); text-transform: uppercase;
+      font-weight: 500;
+      padding-bottom: 18px;
+    }
+    table.compare td.name {
+      font-weight: 600; color: var(--fg-strong); width: 220px;
+    }
+    table.compare td.dinq { color: var(--accent); font-weight: 500; }
+    table.compare tr.row-dinq td {
+      background: rgba(231, 90, 8, 0.06);
+    }
+    table.compare tr.row-dinq td.name { color: var(--accent); }
+    .brand-lockup {
+      display: flex; align-items: center; gap: 12px;
+      min-width: 0;
+    }
+    .brand-lockup img {
+      width: 30px; height: 30px;
+      object-fit: contain;
+      flex-shrink: 0;
+      display: block;
+    }
+    .brand-lockup img.logo-wide {
+      width: 92px; height: 24px;
+    }
+    .brand-lockup .brand-text {
+      display: flex; flex-direction: column; gap: 2px;
+      min-width: 0;
+    }
+    .brand-lockup .brand-text strong {
+      font-size: 18px; line-height: 1.15;
+      color: inherit;
+    }
+    .brand-lockup .brand-text span {
+      font-size: 12px; line-height: 1.2;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .brand-lockup .logo-ats {
+      width: 38px; height: 30px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 11px; letter-spacing: 0.08em;
+      color: var(--fg-strong);
+      background: rgba(255,255,255,0.74);
+      flex-shrink: 0;
+    }
+    .brand-lockup .logo-dinq {
+      width: 30px; height: 30px;
+      object-fit: contain;
+      border-radius: 0;
+      display: block;
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    /* Benchmark result matrix */
+    .bench-wrap {
+      display: flex; flex-direction: column; gap: 22px;
+    }
+    .bench-kpis {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+    }
+    .bench-kpi {
+      padding: 20px 20px 18px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 14px 34px rgba(10, 14, 26, 0.045);
+    }
+    .bench-kpi .k-tag {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 11px; letter-spacing: 0.16em;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .bench-kpi .k-name {
+      font-size: 22px; font-weight: 760; color: var(--fg-strong);
+      line-height: 1.22;
+      margin-bottom: 12px;
+    }
+    .bench-kpi .k-bar {
+      height: 6px; border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), rgba(231, 90, 8, 0.18));
+    }
+    .bench-grid {
+      display: grid; grid-template-columns: 1fr 360px; gap: 22px;
+      align-items: stretch;
+    }
+    .bench-table {
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 18px 42px rgba(10, 14, 26, 0.05);
+    }
+    .bench-row {
+      display: grid; grid-template-columns: 190px 1.02fr 1fr;
+      border-bottom: 1px solid var(--border);
+      min-height: 84px;
+    }
+    .bench-row:last-child { border-bottom: 0; }
+    .bench-row.head {
+      min-height: 44px;
+      background: rgba(248, 249, 251, 0.92);
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 11px; letter-spacing: 0.14em;
+      color: var(--muted); text-transform: uppercase;
+    }
+    .bench-cell {
+      padding: 15px 18px;
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; justify-content: center;
+      font-size: 14px; line-height: 1.42; color: var(--muted);
+    }
+    .bench-cell:last-child { border-right: 0; }
+    .bench-cell strong {
+      font-size: 17px; line-height: 1.25;
+      color: var(--fg-strong); margin-bottom: 5px;
+    }
+    .bench-cell.accent strong { color: var(--accent); }
+    .bench-side {
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .bench-note {
+      flex: 1;
+      padding: 22px;
+      border: 1px solid rgba(231, 90, 8, 0.20);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,246,241,0.92), rgba(255,255,255,0.86));
+      box-shadow: 0 18px 42px rgba(231, 90, 8, 0.055);
+    }
+    .bench-note .note-num {
+      font-size: 44px; font-weight: 780; letter-spacing: -0.02em;
+      color: var(--accent); line-height: 1;
+      margin-bottom: 10px;
+    }
+    .bench-note .note-title {
+      font-size: 22px; font-weight: 760; color: var(--fg-strong);
+      line-height: 1.22; margin-bottom: 10px;
+    }
+    .bench-note .note-text {
+      font-size: 14px; line-height: 1.55; color: var(--muted);
+    }
+    .bench-flow {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 18px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 14px 34px rgba(10, 14, 26, 0.045);
+    }
+    .bench-flow .flow-label {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 11px; letter-spacing: 0.16em;
+      color: var(--accent); text-transform: uppercase;
+      margin-right: 6px;
+    }
+    .bench-flow .flow-chip {
+      padding: 9px 13px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      font-size: 14px; font-weight: 680; color: var(--fg-strong);
+      white-space: nowrap;
+    }
+    .bench-flow .flow-arrow {
+      color: var(--accent); font-size: 16px; font-weight: 800;
+    }
+
+    /* TOC layout */
+    .toc-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 72px;
+    }
+    .toc-col { display: flex; flex-direction: column; gap: 32px; }
+    .toc-item {
+      display: grid; grid-template-columns: 80px 1fr;
+      gap: 24px; padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .toc-item:last-child { border-bottom: 0; }
+    .toc-item .toc-num {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 16px; letter-spacing: 0.1em;
+      color: var(--accent); font-weight: 500;
+      padding-top: 6px;
+    }
+    .toc-item .toc-name {
+      font-size: 28px; font-weight: 600;
+      color: var(--fg-strong);
+      letter-spacing: -0.015em;
+      line-height: 1.25;
+    }
+    .toc-item .toc-sub {
+      font-size: 16px; color: var(--muted);
+      margin-top: 8px; line-height: 1.5;
+    }
+
+    /* Pain point grid */
+    .pain-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+    .pain-card {
+      border: 1px solid var(--border-strong);
+      padding: 36px 32px;
+      background: var(--surface);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .pain-card .pain-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 12px; letter-spacing: 0.2em;
+      color: var(--accent); text-transform: uppercase;
+      align-self: flex-start;
+    }
+    .pain-card .pain-tag::before {
+      content: ''; width: 8px; height: 8px;
+      background: var(--accent); border-radius: 1px;
+    }
+    .pain-card .pain-name {
+      font-size: 28px; font-weight: 600;
+      color: var(--fg-strong);
+      letter-spacing: -0.015em;
+    }
+    .pain-card .pain-desc {
+      font-size: 18px; line-height: 1.55;
+      color: var(--muted);
+    }
+
+    /* Quote block */
+    .quote {
+      border-left: 2px solid var(--accent);
+      padding-left: 32px;
+      font-size: 24px; line-height: 1.5;
+      color: var(--fg);
+      max-width: 1100px;
+      margin-top: 32px;
+    }
+    .quote .accent { color: var(--accent); font-weight: 500; }
+
+    /* Footer for content slides */
+    .slide-foot {
+      margin-top: auto;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 12px; letter-spacing: 0.2em;
+      color: var(--muted-soft);
+      text-transform: uppercase;
+    }
+    .slide-foot .brand {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .slide-foot .brand .dot {
+      width: 6px; height: 6px; background: var(--accent); border-radius: 1px;
+    }
+
+    /* Team cards */
+    .team-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .team-card {
+      border: 1px solid var(--border-strong);
+      padding: 36px 32px;
+      background: var(--surface);
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .team-card .team-name {
+      font-size: 26px; font-weight: 600;
+      color: var(--fg-strong);
+      letter-spacing: -0.015em;
+    }
+    .team-card .team-name .en {
+      display: block; font-size: 14px; color: var(--muted);
+      font-weight: 400; margin-top: 4px;
+      letter-spacing: 0.04em;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    }
+    .team-card .team-role {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px; letter-spacing: 0.16em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .team-card .team-bio {
+      font-size: 15px; line-height: 1.6;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    /* Logo wall */
+    .logo-wall {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+    .logo-cell {
+      padding: 36px 24px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 8px;
+      min-height: 130px;
+      justify-content: center;
+    }
+    .logo-cell:nth-child(4n) { border-right: 0; }
+    .logo-cell .lg-name {
+      font-size: 18px; font-weight: 600;
+      color: var(--fg-strong);
+    }
+    .logo-cell .lg-tag {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 11px; letter-spacing: 0.16em;
+      color: var(--muted-soft);
+      text-transform: uppercase;
+    }
+
+    /* Logo category groups */
+    .logo-cat {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .logo-cat-head {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 15px; letter-spacing: 0.16em;
+      color: var(--accent);
+      text-transform: uppercase;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-strong);
+    }
+    .logo-cat-list {
+      font-size: 18px; line-height: 1.7;
+      color: var(--fg);
+    }
+    .adopter-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+    .adopter-card {
+      min-height: 330px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.58);
+      padding: 28px 22px 24px;
+      display: flex; flex-direction: column; gap: 22px;
+      box-shadow: 0 18px 42px rgba(10, 14, 26, 0.04);
+    }
+    .adopter-list {
+      font-size: 16px; line-height: 1.62;
+      color: var(--muted);
+      min-height: 78px;
+    }
+    .adopter-logos {
+      margin-top: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+      gap: 14px 18px;
+    }
+    .adopter-logos.three-up {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .logo-tile {
+      width: 100%;
+      min-width: 0;
+      height: 58px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0;
+      overflow: hidden;
+    }
+    .logo-tile img {
+      max-width: 128px; max-height: 48px;
+      width: auto; height: auto;
+      object-fit: contain;
+      display: block;
+      flex: 0 1 auto;
+    }
+    .logo-tile.logo-tall img { max-height: 62px; }
+    .logo-tile.logo-wide img { max-width: 146px; max-height: 44px; }
+    .logo-tile.logo-small img { max-width: 74px; max-height: 44px; }
+    .logo-tile.logo-text img { max-width: 118px; max-height: 38px; }
+    .adopter-logos.three-up .logo-tile img { max-width: 96px; max-height: 42px; }
+    .adopter-logos.three-up .logo-tile.logo-wide img { max-width: 106px; max-height: 40px; }
+    .endorse-logo-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .endorse-logo {
+      height: 76px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.82);
+      display: flex; align-items: center; justify-content: center;
+      padding: 14px;
+    }
+    .endorse-logo img {
+      max-width: 100%; max-height: 42px;
+      width: auto; height: auto; object-fit: contain; display: block;
+    }
+    .team-logo-row {
+      margin-top: auto;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .team-logo-chip {
+      height: 54px; min-width: 76px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      padding: 6px 8px;
+    }
+    .team-logo-chip img {
+      max-width: 154px; max-height: 38px;
+      width: auto; height: auto; object-fit: contain; display: block;
+    }
+    .team-logo-chip.icon img { max-width: 42px; max-height: 42px; }
+    .team-logo-chip.damo img { max-width: 116px; max-height: 50px; }
+    .team-logo-chip.text {
+      font-size: 14px; font-weight: 720; color: var(--fg-strong);
+    }
+
+    /* Data source list */
+    .source-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px 56px;
+    }
+    .source-item {
+      display: flex; flex-direction: column; gap: 10px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .source-item .src-tag {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 12px; letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .source-item .src-name {
+      font-size: 22px; font-weight: 600;
+      color: var(--fg-strong);
+    }
+    .source-item .src-desc {
+      font-size: 16px; line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .shortlist-lens {
+      position: absolute;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 360px;
+      padding: 18px 26px 18px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 26px 24px, rgba(255,255,255,0.96), rgba(255,255,255,0.76) 48%, rgba(255,255,255,0.58)),
+        rgba(255, 255, 255, 0.68);
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      box-shadow:
+        0 28px 70px rgba(10, 14, 26, 0.18),
+        0 0 0 1px rgba(231, 90, 8, 0.10),
+        inset 0 1px 0 rgba(255,255,255,0.88);
+    }
+    .shortlist-lens::before {
+      content: '';
+      width: 54px;
+      height: 54px;
+      border: 4px solid var(--accent);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95) 0 18%, rgba(231,90,8,0.10) 19% 100%);
+      box-shadow:
+        0 0 0 8px rgba(231,90,8,0.09),
+        0 10px 26px rgba(231,90,8,0.20);
+      flex: 0 0 auto;
+    }
+    .shortlist-lens::after {
+      content: '';
+      position: absolute;
+      left: 63px;
+      top: 58px;
+      width: 30px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      transform: rotate(45deg);
+      box-shadow: 0 8px 18px rgba(231,90,8,0.24);
+    }
+    .shortlist-lens .lens-text {
+      font-size: 24px;
+      font-weight: 780;
+      line-height: 1.18;
+      color: var(--fg-strong);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .shortlist-lens.lens-left { left: 38px; top: 32px; }
+    .shortlist-lens.lens-top { right: 356px; top: 30px; min-width: 390px; }
+    .shortlist-lens.lens-bottom { right: 74px; bottom: 40px; min-width: 360px; }
+
+    /* Closing slide */
+    .s-closing { padding: 0; background: var(--surface-2); }
+    .s-closing .closing-inner {
+      flex: 1; padding: 100px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .s-closing .closing-main {
+      display: flex; flex-direction: column; gap: 42px;
+    }
+    .s-closing h1.closing-title {
+      font-family: 'SF Pro Display', system-ui, sans-serif;
+      font-size: 120px; font-weight: 700;
+      line-height: 1.0; letter-spacing: -0.03em;
+      color: var(--fg-strong);
+      max-width: 1500px;
+    }
+    .s-closing h1.closing-title .accent { color: var(--accent); }
+    .s-closing .closing-sub {
+      font-size: 32px; line-height: 1.45; color: var(--muted);
+      max-width: 860px;
+    }
+    .s-closing .closing-values {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 32px; margin-top: 18px;
+    }
+    .s-closing .value-card {
+      border-top: 1px solid var(--accent);
+      padding-top: 24px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .s-closing .value-card .vc-tag {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px; letter-spacing: 0.2em;
+      color: var(--accent); text-transform: uppercase;
+    }
+    .s-closing .value-card .vc-name {
+      font-size: 28px; font-weight: 600;
+      color: var(--fg-strong);
+    }
+    .s-closing .value-card .vc-desc {
+      font-size: 17px; line-height: 1.45; color: var(--muted);
+    }
+    .s-closing .closing-url {
+      margin-top: 10px;
+      width: fit-content;
+      min-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 36px;
+      padding: 30px 38px;
+      border: 1px solid rgba(231, 90, 8, 0.28);
+      background: rgba(231, 90, 8, 0.08);
+      box-shadow: 0 22px 56px rgba(231, 90, 8, 0.12);
+      color: var(--fg-strong);
+      text-decoration: none;
+    }
+    .s-closing .closing-url .url-label {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      color: var(--accent);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .s-closing .closing-url .url-text {
+      font-family: 'SF Pro Display', system-ui, sans-serif;
+      font-size: 62px;
+      line-height: 1;
+      font-weight: 720;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="deck-shell">
+    <div class="deck-stage" id="deck-stage">
+
+<!-- ===== Slide 01 · Cover ===== -->
+      <section class="slide active s-cover grid-bg" data-screen-label="01 Title">
+        <span class="corner-dot tl"></span>
+        <span class="corner-dot tr"></span>
+        <span class="corner-dot bl"></span>
+        <span class="corner-dot br"></span>
+        <div class="cover-inner">
+          <div class="cover-top">
+            <div class="cover-logo">DINQ<span class="dot">.</span></div>
+            <div>2026 · 产品介绍</div>
+          </div>
+          <div class="cover-main">
+            <div class="cover-eyebrow">DINQ · Talent Search Platform</div>
+            <h1 class="cover-title">全行业人才精准挖掘<br>DINQ <span class="accent">一搜即得</span></h1>
+            <div class="cover-sub">从真实作品中发现关键人才</div>
+          </div>
+          <div class="cover-foot">
+            <div class="cover-tagline">DINQ 不是简历数据库，也非通用网页检索——而是一套 AI 原生人才智能搜索引擎。不限赛道、不限地域，全行业高端人才一搜即得。</div>
+            <div class="cover-meta">
+              v2026.01<br>
+              中文版
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 02 · Contents ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="02 Contents">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">Contents · 目录</div>
+            <h1 class="slide-title">十个章节<br>全方位展现产品能力</h1>
+          </div>
+          <div class="right">DINQ · 2026</div>
+        </div>
+        <div class="body">
+          <div class="toc-grid">
+            <div class="toc-col">
+              <div class="toc-item">
+                <div class="toc-num">01</div>
+                <div>
+                  <div class="toc-name">行业招聘现存痛点</div>
+                  <div class="toc-sub">市场人才趋势 · 传统寻访短板</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">02</div>
+                <div>
+                  <div class="toc-name">平台落地：头部机构已率先试用</div>
+                  <div class="toc-sub">各行业客户案例</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">03</div>
+                <div>
+                  <div class="toc-name">全行业人才覆盖</div>
+                  <div class="toc-sub">多赛道真实寻访案例</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">04</div>
+                <div>
+                  <div class="toc-name">DINQ 产品定位与底层能力</div>
+                  <div class="toc-sub">产品核心价值 · 多源人才图谱底座</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">05</div>
+                <div>
+                  <div class="toc-name">全功能模块介绍</div>
+                  <div class="toc-sub">Search · API Playground · Talent Radar · Shortlist · Integration · Page · Organization</div>
+                </div>
+              </div>
+            </div>
+            <div class="toc-col">
+              <div class="toc-item">
+                <div class="toc-num">06</div>
+                <div>
+                  <div class="toc-name">数据能力与可信度</div>
+                  <div class="toc-sub">数据源覆盖 · 数据时效性与溯源</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">07</div>
+                <div>
+                  <div class="toc-name">竞品横向对比分析</div>
+                  <div class="toc-sub">差异化定位 · 实测结论</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">08</div>
+                <div>
+                  <div class="toc-name">品牌背书</div>
+                  <div class="toc-sub">客户 · 媒体 · 团队 · 生态认可</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">09</div>
+                <div>
+                  <div class="toc-name">产品适用业务场景</div>
+                  <div class="toc-sub">AI · 实体 · 制造 · 出海 · 消费</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">10</div>
+                <div>
+                  <div class="toc-name">总结与展望</div>
+                  <div class="toc-sub">三大核心价值</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>02 · CONTENTS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 03 · 平台落地 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="03 Early Adopters">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">02 · Early Adopters</div>
+            <h1 class="slide-title">平台落地<br>各行业头部机构已率先试用</h1>
+            <h2 class="slide-subtitle">目前已有 AI 科研企业、实业公司、投资机构、海外团队、专业猎头平台使用、体验 DINQ。</h2>
+          </div>
+          <div class="right">EARLY USERS</div>
+        </div>
+        <div class="body">
+          <div class="adopter-grid">
+            <div class="adopter-card">
+              <div class="logo-cat-head">AI 科研机构 · AI Research</div>
+              <div class="adopter-list">智谱华章 · Synapse AI<br>EDGE Agentic Labs · KoreTech</div>
+              <div class="adopter-logos three-up">
+                <div class="logo-tile"><img src="../logos/logo-zhipu.png" alt="Zhipu AI logo"></div>
+                <div class="logo-tile"><img src="../logos/logo-edge.jpeg" alt="EDGE Agentic Labs logo"></div>
+                <div class="logo-tile logo-wide"><img src="../logos/logo-damo-header.svg" alt="KoreTech logo"></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">国内企业 · Enterprise</div>
+              <div class="adopter-list">蚂蚁集团 · 字节跳动<br>腾讯 · 京东</div>
+              <div class="adopter-logos">
+                <div class="logo-tile logo-wide"><img src="../logos/logo-antgroup.jpeg" alt="Ant Group logo"></div>
+                <div class="logo-tile logo-wide"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></div>
+                <div class="logo-tile logo-wide"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></div>
+                <div class="logo-tile logo-text"><img src="../logos/logo-jd.svg" alt="JD.com logo"></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">创投基金 · Venture Capital</div>
+              <div class="adopter-list">顺为资本 · 清新资本<br>NYX Ventures</div>
+              <div class="adopter-logos">
+                <div class="logo-tile logo-tall"><img src="../logos/logo-shunwei.png" alt="Shunwei Capital logo"></div>
+                <div class="logo-tile"><img src="../logos/logo-nyx.jpeg" alt="NYX Ventures logo"></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">海外团队 &amp; 猎头 · Overseas</div>
+              <div class="adopter-list">SPM · Agrícola Campolor<br>Vivende Inmobiliaria</div>
+              <div class="adopter-logos three-up">
+                <div class="logo-tile"><img src="../logos/logo-spm.jpeg" alt="SPM Agency logo"></div>
+                <div class="logo-tile logo-wide"><img src="../logos/logo-campolor.webp" alt="Agricola Campolor logo"></div>
+                <div class="logo-tile"><img src="../logos/logo-vivende.png" alt="Vivende Inmobiliaria logo"></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 24px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--muted-soft); padding: 14px 0 0; border-top: 1px solid var(--border);">
+            合规声明：所列机构仅为平台注册、试用用户所属企业示例，不构成官方合作、客户签约、品牌背书。
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>03 · EARLY ADOPTERS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 04 · 行业挑战 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="04 Challenge">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">01 · Industry Challenge</div>
+            <h1 class="slide-title">人才招聘<br>已成为企业技术竞争的核心环节</h1>
+            <h2 class="slide-subtitle">人工智能正在重构产品研发、团队管理全流程。对于科研、高端技术、AI 研发类岗位，精准匹配人才已是决定企业能否抓住技术发展窗口的核心战略。</h2>
+          </div>
+          <div class="right">3 KEY POINTS</div>
+        </div>
+        <div class="body">
+          <ul class="bullets">
+            <li>
+              <div class="num">01</div>
+              <div class="txt">
+                <strong>技术迭代提速</strong>
+                <span>人才能力要求同步快速迭代。</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">02</div>
+              <div class="txt">
+                <strong>顶尖人才稀缺</strong>
+                <span>优质候选人大多不会主动投递求职。</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">03</div>
+              <div class="txt">
+                <strong>核心人才影响</strong>
+                <span>足以决定模型效果、产品线成败，甚至整个团队的发展路线。</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>04 · INDUSTRY CHALLENGE</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 05 · 数据断层 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="05 Data Gap">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">01 · Talent Gap</div>
+            <h1 class="slide-title">人才供需、技能迭代<br>出现巨大断层</h1>
+          </div>
+          <div class="right">WEF · LINKEDIN</div>
+        </div>
+        <div class="body">
+          <div class="stat-row" style="margin-bottom: 48px;">
+            <div class="stat-card">
+              <div class="stat-arrow">↗</div>
+              <div class="stat-label">业务重构预期</div>
+              <div class="stat-num"><span class="accent">86</span><span class="stat-unit">%</span></div>
+              <div class="stat-desc">企业认为 AI 将在 2030 年前彻底重构自身业务</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-arrow">↗</div>
+              <div class="stat-label">技能迭代淘汰</div>
+              <div class="stat-num"><span class="accent">39</span><span class="stat-unit">%</span></div>
+              <div class="stat-desc">职场现有技能将在 2025—2030 五年间被迭代淘汰</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-arrow">↗</div>
+              <div class="stat-label">人才技能断层</div>
+              <div class="stat-num"><span class="accent">63</span><span class="stat-unit">%</span></div>
+              <div class="stat-desc">企业将人才技能断层视作业务转型最大阻碍</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-arrow">↗</div>
+              <div class="stat-label">持续招募意愿</div>
+              <div class="stat-num"><span class="accent">70</span><span class="stat-unit">%</span></div>
+              <div class="stat-desc">企业计划持续招募掌握新型技术的专业人才</div>
+            </div>
+          </div>
+          <div class="quote">微软领英《2024 职场趋势指数》指出：工程、网络安全、创意设计赛道，<span class="accent">超六成企业管理层面临核心岗位人才短缺难题</span>。高效寻访、精准识别人才的能力，是企业数字化、智能化转型必备底层能力。</div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>05 · TALENT GAP</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 06 · 传统失效 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="06 Legacy Fails">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">01 · Legacy Failure</div>
+            <h1 class="slide-title">传统人才筛选依据全面失效<br>寻访模式难以适配行业需求</h1>
+            <h2 class="slide-subtitle">过往招聘仅依靠简历、学历、从业企业、关键词筛选。这类标准无法客观衡量真实技术实力，高端岗位寻访的效率与精准度远不达标。</h2>
+          </div>
+          <div class="right">FOUR PAIN POINTS</div>
+        </div>
+        <div class="body">
+          <div class="pain-grid">
+            <div class="pain-card">
+              <div class="pain-tag">PAIN 01</div>
+              <div class="pain-name">搜不全</div>
+              <div class="pain-desc">局限单一平台检索，GitHub、Hugging Face、谷歌学术等数十个平台的优质成果无法统一汇总。</div>
+            </div>
+            <div class="pain-card">
+              <div class="pain-tag">PAIN 02</div>
+              <div class="pain-name">判不准</div>
+              <div class="pain-desc">仅凭书面材料，无法评估科研水平、代码质量、工程落地能力。简历可包装，关键词无法判断技术深耕程度。</div>
+            </div>
+            <div class="pain-card">
+              <div class="pain-tag">PAIN 03</div>
+              <div class="pain-name">交付慢</div>
+              <div class="pain-desc">高端岗位需反复梳理需求、多平台检索、人工核验、逐一挖掘联系方式，单次寻访周期以周为单位。</div>
+            </div>
+            <div class="pain-card">
+              <div class="pain-tag">PAIN 04</div>
+              <div class="pain-name">难沉淀</div>
+              <div class="pain-desc">每次寻访从零起步，无可持续复用人才库、候选人清单与标准化人才触达流程。</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>06 · LEGACY FAILURE</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 07 · 全行业人才覆盖 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="07 Cross-Industry">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">03 · Cross-Industry Coverage</div>
+            <h1 class="slide-title">全行业人才精准挖掘<br>DINQ 一搜即得</h1>
+            <h2 class="slide-subtitle">不限赛道、不限地域——实体、制造、出海、科技、消费全域高端人才一站式寻访。</h2>
+          </div>
+          <div class="right">5 REAL CASES</div>
+        </div>
+        <div class="body">
+          <div class="col-2-5-7">
+            <div>
+              <p class="lead" style="font-size: 18px; line-height: 1.6; color: var(--muted);">DINQ 并非只面向 AI 领域的人才寻访工具，全行业招聘场景均可落地使用。高精尖技术岗位可聚合 GitHub、学术论文、开源项目等多维度深度数据；实体产业、海外市场、消费零售、新媒体等赛道，依托工商、渠道、媒体、海外公开信息，同样能精准定位优质候选人。无论你需要研发专家、工厂管理者、渠道负责人、海外本地达人、跨境市场负责人，输入人才画像即可完成全域检索、履历核验、人脉挖掘。</p>
+              <div style="margin-top: 24px; padding: 18px 22px; border-left: 2px solid var(--accent); background: var(--accent-glow);">
+                <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px;">SUMMARY</div>
+                <div style="font-size: 15px; line-height: 1.55; color: var(--fg);">覆盖科技、制造、实体、消费、跨境出海全赛道，任何行业高端人才均可精准定位。</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px;">REAL CASES</div>
+              <ul class="bullets" style="gap: 14px;">
+                <li>
+                  <div class="num">01</div>
+                  <div class="txt"><strong>高端音响线下渠道负责人</strong><span>消费线下渠道寻访</span></div>
+                </li>
+                <li>
+                  <div class="num">02</div>
+                  <div class="txt"><strong>畜牧、乳制品工厂厂长</strong><span>实体生产管理人才挖掘</span></div>
+                </li>
+                <li>
+                  <div class="num">03</div>
+                  <div class="txt"><strong>拉美本土 KOL &amp; 海外新媒体运营</strong><span>出海本地化内容人才</span></div>
+                </li>
+                <li>
+                  <div class="num">04</div>
+                  <div class="txt"><strong>半导体工厂研发 / 生产厂长</strong><span>高端制造技术管理岗</span></div>
+                </li>
+                <li>
+                  <div class="num">05</div>
+                  <div class="txt"><strong>具备全球落地经验 GTM 负责人</strong><span>跨境出海市场人才</span></div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>07 · CROSS-INDUSTRY</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 08 · DINQ 核心解决 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="08 Core Solution">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">04 · Core Solution</div>
+            <h1 class="slide-title">DINQ 核心<br>解决行业痛点</h1>
+            <h2 class="slide-subtitle">DINQ 既非传统简历数据库，也不是通用网页检索工具，而是一套 AI 原生人才智能搜索引擎。使用者只需用自然语言描述人才画像，系统整合全网多维度公开信息，完成候选人挖掘、能力解析、资料核验与统一归档。</h2>
+          </div>
+          <div class="right">THREE UPGRADES</div>
+        </div>
+<div class="body">
+           <div class="upgrade-diagram">
+             <div class="upgrade-item">
+               <div class="upg-top">
+                 <div class="upg-label">寻访逻辑升级</div>
+                 <div class="upg-num">01</div>
+               </div>
+               <div class="upg-row">
+                 <div class="upg-before">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+                   <span>筛选纸质简历</span>
+                 </div>
+                 <div class="upg-divider"></div>
+                 <div class="upg-after">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12A10 10 0 1 1 12 2"></path><polyline points="22 4 12 14 9 11"></polyline></svg>
+                   <span>挖掘真实技术产出</span>
+                 </div>
+               </div>
+               <div class="upg-mini"><span>代码</span><i></i><span>论文</span><i></i><span>项目</span></div>
+             </div>
+             <div class="upgrade-item">
+               <div class="upg-top">
+                 <div class="upg-label">检索逻辑升级</div>
+                 <div class="upg-num">02</div>
+               </div>
+               <div class="upg-row">
+                 <div class="upg-before">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+                   <span>死板关键词匹配</span>
+                 </div>
+                 <div class="upg-divider"></div>
+                 <div class="upg-after">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+                   <span>语义解析 + 多轮逻辑推理</span>
+                 </div>
+               </div>
+               <div class="upg-mini"><span>画像</span><i></i><span>推理</span><i></i><span>核验</span></div>
+             </div>
+             <div class="upgrade-item">
+               <div class="upg-top">
+                 <div class="upg-label">工作流程升级</div>
+                 <div class="upg-num">03</div>
+               </div>
+               <div class="upg-row">
+                 <div class="upg-before">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                   <span>人工整理候选人清单</span>
+                 </div>
+                 <div class="upg-divider"></div>
+                 <div class="upg-after">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                   <span>检索—评估—建档—触达—长期追踪</span>
+                 </div>
+               </div>
+               <div class="upg-mini"><span>检索</span><i></i><span>建档</span><i></i><span>追踪</span></div>
+             </div>
+           </div>
+         </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>08 · CORE SOLUTION</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 09 · 底层能力 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="09 Knowledge Graph">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">04 · Knowledge Graph</div>
+            <h1 class="slide-title">底层能力<br>多源数据构建完整人才知识图谱</h1>
+            <h2 class="slide-subtitle">DINQ 整合 <span style="color: var(--accent); font-weight: 500;">500+ 全网公开数据渠道</span>，覆盖职业履历、开源代码、学术论文、AI 模型、落地项目、个人主页、企业机构信息。</h2>
+          </div>
+          <div class="right">FOUR CAPABILITIES</div>
+        </div>
+        <div class="body">
+          <div class="module-grid cols-4">
+            <div class="module-card">
+              <div class="mod-num">01</div>
+              <div class="mod-name">跨平台身份统一<span class="en">Identity Resolution</span></div>
+              <div class="mod-desc">整合同一开发者在 GitHub、Hugging Face、学术平台、职业档案下全部账号，合并为唯一完整人才档案。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">02</div>
+              <div class="mod-name">人脉网络推演<span class="en">Network Inference</span></div>
+              <div class="mod-desc">依托合著论文、合作项目、校友、同事、投资、开源协作等公开记录，自动梳理人才行业关系网。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">03</div>
+              <div class="mod-name">语义智能检索<span class="en">Semantic Search</span></div>
+              <div class="mod-desc">支持基于技术能力、研究领域、开发栈、行业经验模糊检索，不局限固定字段精准匹配。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">04</div>
+              <div class="mod-name">实时统一索引<span class="en">Realtime Index</span></div>
+              <div class="mod-desc">全部数据标准化后持续更新检索库，企业无需自主搭建数据抓取、清洗、去重、身份合并整套体系。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>09 · KNOWLEDGE GRAPH</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 10 · 全功能模块总览 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="10 Modules Overview">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Modules Overview</div>
+            <h1 class="slide-title">单次检索到长期人才运营<br>七大模块覆盖全工作流</h1>
+          </div>
+          <div class="right">7 MODULES</div>
+        </div>
+        <div class="body">
+          <div class="module-grid cols-4" style="margin-bottom: 24px;">
+            <div class="module-card">
+              <div class="mod-num">M-01</div>
+              <div class="mod-name">搜索<span class="en">Search</span></div>
+              <div class="mod-desc">平台核心功能，自然语言描述画像，智能代理全网全域挖掘候选人。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-02</div>
+              <div class="mod-name">API 演练场<span class="en">API Playground</span></div>
+              <div class="mod-desc">秒级输出人才数据的可视化调试控制台，可测试检索请求、参数、人才卡片与 JSON。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-03</div>
+              <div class="mod-name">人才雷达<span class="en">Talent Radar</span></div>
+              <div class="mod-desc">自动化定时扫描人才池，新增匹配候选人自动推送至工作台。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-04</div>
+              <div class="mod-name">候选名单<span class="en">Shortlist</span></div>
+              <div class="mod-desc">分类归档意向人才，支持分组管理、状态追踪、批量导出。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+          </div>
+          <div class="module-grid cols-3">
+            <div class="module-card">
+              <div class="mod-num">M-05</div>
+              <div class="mod-name">集成<span class="en">Integration</span></div>
+              <div class="mod-desc">绑定邮箱沟通；通过 API、MCP 协议将 DINQ 检索能力嵌入大模型、智能代理、ATS 与内部业务平台。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-06</div>
+              <div class="mod-name">个人主页<span class="en">Page</span></div>
+              <div class="mod-desc">搭建专属 DINQ 动态职业档案，自动汇总全部技术成果。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-07</div>
+              <div class="mod-name">组织<span class="en">Organization</span></div>
+              <div class="mod-desc">创建企业、实验室、开源社区专属官方主页，沉淀团队技术成果与人脉网络。</div>
+              <div class="mod-arrow">→</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>10 · MODULES OVERVIEW</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 11 · Search ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="11 Search">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Module · Search</div>
+            <h1 class="slide-title">搜索 Search<br>用自然语言找到复杂人才画像</h1>
+            <h2 class="slide-subtitle">使用者可如同和资深猎头沟通一般，自由描述招聘需求。</h2>
+          </div>
+          <div class="right">M-01 · SEARCH</div>
+        </div>
+        <div class="body" style="display:flex;align-items:center;justify-content:center;gap:56px;padding-top:0;">
+          <div style="display:flex;align-items:flex-start;gap:18px;width:calc((100% - 56px) * 0.46);height:600px;">
+            <div
+              style="
+                flex:0 0 230px;
+                margin-top:34px;
+                padding:16px 18px;
+                border:1px solid rgba(255,255,255,0.58);
+                border-radius:20px;
+                background:rgba(255,255,255,0.52);
+                backdrop-filter:blur(18px) saturate(160%);
+                -webkit-backdrop-filter:blur(18px) saturate(160%);
+                box-shadow:0 18px 50px rgba(10,14,26,0.10);
+                color:#0a0e1a;
+                font-size:17px;
+                line-height:1.45;
+                font-weight:500;
+              "
+            >我想找做过 LLM inference optimization 的工程师，最好有 CUDA、TensorRT 或 vLLM 经验。有开源作品更好。地点可以灵活，优先北美或远程。</div>
+            <img
+              src="product-images/product-search1.png"
+              alt="DINQ Search refinement screenshot"
+              style="
+                display:block;
+                width:auto;
+                height:600px;
+                max-width:calc(100% - 248px);
+                object-fit:contain;
+              "
+            />
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:18px;width:calc((100% - 56px) * 0.54);height:600px;">
+            <img
+              src="product-images/product-search2.png"
+              alt="DINQ Search results screenshot"
+              style="
+                display:block;
+                width:auto;
+                height:600px;
+                max-width:calc(100% - 248px);
+                object-fit:contain;
+              "
+            />
+            <div
+              style="
+                flex:0 0 230px;
+                margin-top:34px;
+                padding:16px 18px;
+                border:1px solid rgba(255,255,255,0.58);
+                border-radius:20px;
+                background:rgba(255,255,255,0.52);
+                backdrop-filter:blur(18px) saturate(160%);
+                -webkit-backdrop-filter:blur(18px) saturate(160%);
+                box-shadow:0 18px 50px rgba(10,14,26,0.10);
+                color:#0a0e1a;
+                font-size:17px;
+                line-height:1.45;
+                font-weight:500;
+              "
+            >帮我找 20 个做 AI agent infrastructure 的工程师，最好有开源贡献</div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>11 · SEARCH</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 12 · 候选人档案 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="12 Profile">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Candidate Profile</div>
+            <h1 class="slide-title">候选人档案<br>以真实技术成果作为能力评判标准</h1>
+            <h2 class="slide-subtitle">搜索 Search 输出不只是简单名单，平台会自动生成完整标准化人才档案。区别于主观撰写的简历，档案全部依托全网公开技术成果生成，每条信息均可溯源核验。</h2>
+          </div>
+          <div class="right">6 SECTIONS</div>
+        </div>
+        <div class="body" style="display:grid;grid-template-columns:300px 1fr 300px;gap:28px;align-items:center;padding-top:8px;">
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">01</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">基础信息</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">姓名、职位、机构、地点与公开身份入口</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">02</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">教育背景</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">学校、学位、导师与研究方向自动归档</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">03</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">职业经历</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">公司、岗位、任职时间线与关键项目经历</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid rgba(231,90,8,0.30);border-radius:16px;background:var(--accent-glow);box-shadow:0 16px 36px rgba(231,90,8,0.08);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">NOTE</div>
+              <div style="font-size:21px;font-weight:700;color:var(--fg-strong);line-height:1.2;">重名者标注</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">左下角自动提示同名候选人，避免把不同履历混淆</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;">
+            <img
+              src="product-images/product-search-profile.png"
+              alt="DINQ candidate profile product screenshot"
+              style="
+                width: auto;
+                height: 560px;
+                max-width: 100%;
+                object-fit: contain;
+              "
+            />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">04</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">学术成就</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">论文、引用量、代表成果与研究贡献</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">05</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">关键链接</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">主页、LinkedIn、Google Scholar 与邮箱线索</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">06</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">溯源核验</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">每条档案信息都能回到公开来源验证</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>12 · CANDIDATE PROFILE</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 13 · API Playground ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="13 API">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Module · API Playground</div>
+            <h1 class="slide-title">API 演练场 API Playground<br>轻量化开放检索工具</h1>
+            <h2 class="slide-subtitle">可直接在网页端调试人才检索接口，可视化操作后台参数面板，自由切换可视化视图与原始 JSON 数据。</h2>
+          </div>
+          <div class="right">M-02 · API PLAYGROUND</div>
+        </div>
+        <div class="body" style="display:grid;grid-template-columns:300px 1fr 300px;gap:28px;align-items:center;padding-top:8px;">
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">01 · OUTPUT</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">毫秒级输出</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">快速返回标准化人才数据</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">02 · PARAMS</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">多维参数自定义</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">描述、人数、活跃周期与数据源均可配置</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">03 · PREVIEW</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">双模式预览</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">可视化人才卡片 / 原始 JSON 自由切换</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;">
+            <img
+              src="product-images/product-apiplayground.png"
+              alt="DINQ API Playground product screenshot"
+              style="
+                width:auto;
+                height:560px;
+                max-width:100%;
+                object-fit:contain;
+              "
+            />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">04 · CODE</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">自动生成代码</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Python、TypeScript、cURL 调用脚本可直接复用</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid rgba(231,90,8,0.30);border-radius:16px;background:var(--accent-glow);box-shadow:0 16px 36px rgba(231,90,8,0.08);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">05 · MAPPING</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">行业人才测绘</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">快速绘制技术、企业、赛道与区域人才分布</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>13 · API PLAYGROUND</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 14 · Integration (API/MCP) ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="14 Integration">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Module · Integration</div>
+            <h1 class="slide-title">集成 Integration<br>连接邮箱、API 和 MCP</h1>
+            <h2 class="slide-subtitle">DINQ 从独立网页工具升级为<span style="color: var(--accent); font-weight: 500;">企业底层人才检索基础设施</span>——人才寻访成为大模型可直接调用的底层能力。</h2>
+          </div>
+          <div class="right">M-05 · INTEGRATION</div>
+        </div>
+        <div class="body" style="display:grid;grid-template-columns:300px 1fr 300px;gap:28px;align-items:center;padding-top:8px;">
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">01 · API</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">标准接口接入</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">调用 people/search 等接口，同步完整人才档案到自有系统</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">02 · MCP</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">智能客户端调用</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">支持 Claude Desktop、OpenAI Codex 等兼容客户端直接调用 DINQ</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">03 · AGENT</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">智能代理工作流</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">异步检索、查询进度、获取结构化数据，自动生成分析与报告</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center;">
+            <img
+              src="product-images/product-integration1.png"
+              alt="DINQ Integration product screenshot"
+              style="
+                width:100%;
+                height:560px;
+                object-fit:contain;
+              "
+            />
+            <img
+              src="product-images/product-integration2.png"
+              alt="DINQ API code product screenshot"
+              style="
+                width:100%;
+                height:560px;
+                object-fit:contain;
+              "
+            />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:18px 20px;border:1px solid rgba(231,90,8,0.30);border-radius:18px;background:var(--accent-glow);box-shadow:0 16px 36px rgba(231,90,8,0.08);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:10px;">CORE VALUE</div>
+              <div style="font-size:25px;font-weight:750;color:var(--fg-strong);line-height:1.2;">人才寻访成为大模型可调用的底层能力</div>
+              <div style="font-size:16px;line-height:1.48;color:var(--muted);margin-top:12px;">招聘、产业投研、行业调研不再依赖人工手动搜集，升级为自动化数据分析。</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.72);font-size:17px;font-weight:650;color:var(--fg-strong);text-align:center;">招聘</div>
+              <div style="padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.72);font-size:17px;font-weight:650;color:var(--fg-strong);text-align:center;">投研</div>
+              <div style="padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.72);font-size:17px;font-weight:650;color:var(--fg-strong);text-align:center;">调研</div>
+              <div style="padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.72);font-size:17px;font-weight:650;color:var(--fg-strong);text-align:center;">报告</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>14 · INTEGRATION</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 15 · Talent Radar ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="15 Talent Radar">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Module · Talent Radar</div>
+            <h1 class="slide-title">人才雷达 Talent Radar<br>高频岗位全自动持续寻访</h1>
+            <h2 class="slide-subtitle">针对长期开放、持续补人的岗位，将单次手动检索转化为 7×24 小时自动扫描任务。</h2>
+          </div>
+          <div class="right">M-03 · TALENT RADAR</div>
+        </div>
+        <div class="body" style="position:relative;display:flex;align-items:center;justify-content:center;padding-top:8px;">
+          <img
+            src="product-images/product-talentradar1.png"
+            alt="DINQ Talent Radar main product screenshot"
+            style="
+              width:1320px;
+              max-height:560px;
+              object-fit:contain;
+            "
+          />
+          <img
+            src="product-images/product-talentradar2.png"
+            alt="DINQ Talent Radar creation modal screenshot"
+            style="
+              position:absolute;
+              right:105px;
+              top:72px;
+              width:390px;
+              height:auto;
+              object-fit:contain;
+              filter:drop-shadow(0 28px 42px rgba(10,14,26,0.22)) drop-shadow(0 8px 14px rgba(10,14,26,0.10));
+              border-radius:22px;
+            "
+          />
+          <div style="position:absolute;left:180px;bottom:42px;display:flex;gap:12px;">
+            <div style="padding:13px 18px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:18px;font-weight:650;color:var(--fg-strong);">描述需求</div>
+            <div style="padding:13px 18px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:18px;font-weight:650;color:var(--fg-strong);">全天候扫描</div>
+            <div style="padding:13px 18px;border:1px solid rgba(231,90,8,0.30);border-radius:999px;background:var(--accent-glow);font-size:18px;font-weight:700;color:var(--fg-strong);">获取匹配</div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>15 · TALENT RADAR</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 16 · Shortlist ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="16 Shortlist">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Module · Shortlist</div>
+            <h1 class="slide-title">候选名单 Shortlist<br>沉淀可协作的长期人才资产库</h1>
+            <h2 class="slide-subtitle">DINQ 不只是单次输出检索名单，更支持团队长期归档、分类跟进、重复挖掘候选人资源。</h2>
+          </div>
+          <div class="right">M-04 · SHORTLIST</div>
+        </div>
+        <div class="body" style="position:relative;display:grid;grid-template-columns:1.08fr 0.92fr;gap:34px;align-items:center;padding-top:8px;">
+          <img
+            src="product-images/product-shortlist1.png"
+            alt="DINQ Shortlist save candidates screenshot"
+            style="
+              width:100%;
+              height:560px;
+              object-fit:contain;
+            "
+          />
+          <img
+            src="product-images/product-shortlist2.png"
+            alt="DINQ Shortlist asset library screenshot"
+            style="
+              width:100%;
+              height:560px;
+              object-fit:contain;
+            "
+          />
+          <div class="shortlist-lens lens-left">
+            <div class="lens-text">批量操作</div>
+          </div>
+          <div class="shortlist-lens lens-top">
+            <div class="lens-text">全流程状态追踪</div>
+          </div>
+          <div class="shortlist-lens lens-bottom">
+            <div class="lens-text">长期资产沉淀</div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>16 · SHORTLIST</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 17 · Outreach ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="17 Outreach">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Module · Outreach</div>
+            <h1 class="slide-title">沟通 Outreach<br>候选人触达全流程</h1>
+            <h2 class="slide-subtitle">从合规联系方式、专属邮件生成，到人工确认后发送，让人才沟通基于真实背景，而不是批量模板群发。</h2>
+          </div>
+          <div class="right">M-05 · OUTREACH</div>
+        </div>
+        <div class="body" style="position:relative;display:grid;grid-template-columns:1.04fr 0.96fr;gap:18px;align-items:center;padding-top:2px;">
+          <div style="position:relative;height:558px;display:flex;align-items:center;">
+            <img
+              src="product-images/product-outreach1.png"
+              alt="DINQ outreach candidate profile and compliant contact screenshot"
+              style="
+                width:100%;
+                height:558px;
+                object-fit:contain;
+                filter:drop-shadow(0 26px 48px rgba(10,14,26,0.10));
+              "
+            />
+            <div style="position:absolute;left:24px;top:36px;width:258px;padding:16px 18px;border:1px solid rgba(255,255,255,0.72);border-radius:18px;background:rgba(255,255,255,0.58);backdrop-filter:blur(18px) saturate(165%);-webkit-backdrop-filter:blur(18px) saturate(165%);box-shadow:0 20px 48px rgba(10,14,26,0.12);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:0.16em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;">CONTACT</div>
+              <div style="font-size:20px;font-weight:760;line-height:1.25;color:var(--fg-strong);">档案内调取合规联系方式</div>
+            </div>
+          </div>
+          <div style="position:absolute;left:50.2%;top:164px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid rgba(231,90,8,0.24);border-radius:999px;background:rgba(255,255,255,0.68);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);box-shadow:0 18px 42px rgba(10,14,26,0.10);">
+            <div style="font-size:12px;font-family:ui-monospace,'SF Mono',Menlo,monospace;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;">PROFILE</div>
+            <div style="width:56px;height:2px;background:linear-gradient(90deg,rgba(231,90,8,0.10),var(--accent));position:relative;">
+              <span style="position:absolute;right:-1px;top:50%;width:8px;height:8px;border-right:2px solid var(--accent);border-top:2px solid var(--accent);transform:translateY(-50%) rotate(45deg);"></span>
+            </div>
+            <div style="font-size:15px;font-weight:760;color:var(--fg-strong);white-space:nowrap;">生成邮件</div>
+          </div>
+          <div style="position:relative;min-height:558px;display:flex;flex-direction:column;justify-content:center;gap:18px;">
+            <img
+              src="product-images/product-outreach2.png"
+              alt="DINQ generated outreach email preview screenshot"
+              style="
+                width:492px;
+                max-width:100%;
+                align-self:flex-start;
+                transform:translateX(-18px);
+                border-radius:20px;
+                filter:drop-shadow(0 28px 48px rgba(10,14,26,0.20)) drop-shadow(0 8px 14px rgba(10,14,26,0.10));
+              "
+            />
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="padding:16px 16px 15px;border:1px solid rgba(15,23,42,0.10);border-radius:16px;background:rgba(255,255,255,0.78);box-shadow:0 14px 32px rgba(10,14,26,0.06);">
+                <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:var(--accent);font-weight:760;margin-bottom:8px;">01</div>
+                <div style="font-size:18px;font-weight:760;color:var(--fg-strong);line-height:1.25;">专属沟通邮件</div>
+                <div style="font-size:13px;line-height:1.45;color:var(--muted);margin-top:6px;">结合论文、开源项目、研发方向自动生成。</div>
+              </div>
+              <div style="padding:16px 16px 15px;border:1px solid rgba(15,23,42,0.10);border-radius:16px;background:rgba(255,255,255,0.78);box-shadow:0 14px 32px rgba(10,14,26,0.06);">
+                <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:var(--accent);font-weight:760;margin-bottom:8px;">02</div>
+                <div style="font-size:18px;font-weight:760;color:var(--fg-strong);line-height:1.25;">发送前可编辑</div>
+                <div style="font-size:13px;line-height:1.45;color:var(--muted);margin-top:6px;">调整行文风格、岗位介绍与邀约内容。</div>
+              </div>
+              <div style="padding:16px 16px 15px;border:1px solid rgba(15,23,42,0.10);border-radius:16px;background:rgba(255,255,255,0.78);box-shadow:0 14px 32px rgba(10,14,26,0.06);">
+                <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:var(--accent);font-weight:760;margin-bottom:8px;">03</div>
+                <div style="font-size:18px;font-weight:760;color:var(--fg-strong);line-height:1.25;">双通道触达</div>
+                <div style="font-size:13px;line-height:1.45;color:var(--muted);margin-top:6px;">支持站内私信与绑定邮箱沟通。</div>
+              </div>
+              <div style="padding:16px 16px 15px;border:1px solid rgba(231,90,8,0.22);border-radius:16px;background:var(--accent-glow);box-shadow:0 14px 32px rgba(231,90,8,0.06);">
+                <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:var(--accent);font-weight:760;margin-bottom:8px;">REVIEW</div>
+                <div style="font-size:18px;font-weight:760;color:var(--fg-strong);line-height:1.25;">人工审核确认</div>
+                <div style="font-size:13px;line-height:1.45;color:var(--muted);margin-top:6px;">AI 文案需确认后发送，使用真实企业身份。</div>
+              </div>
+            </div>
+            <div style="padding:13px 16px;border:1px solid rgba(231,90,8,0.24);border-radius:14px;background:rgba(255,246,241,0.78);font-size:13px;line-height:1.5;color:var(--fg);">
+              <strong style="color:var(--accent);">合规提示：</strong>尊重候选人意愿，禁止批量骚扰式群发。
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>17 · OUTREACH</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 18 · 数据源 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="18 Data Sources">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">06 · Data Sources</div>
+            <h1 class="slide-title">全渠道数据源<br>挖掘简历无法体现的技术实力</h1>
+          </div>
+          <div class="right">6 CATEGORIES</div>
+        </div>
+        <div class="body">
+          <div class="source-grid">
+            <div class="source-item">
+              <div class="src-tag">SOURCE 01 · OPEN SOURCE</div>
+              <div class="src-name">开源代码平台（GitHub）</div>
+              <div class="src-desc">开发者账号、代码仓库、开发语言、技术标签、项目点赞 / 复刻 / 关注数据、开源协作记录、全部公开动态。</div>
+            </div>
+            <div class="source-item">
+              <div class="src-tag">SOURCE 02 · AI MODELS</div>
+              <div class="src-name">AI 模型社区（Hugging Face）</div>
+              <div class="src-desc">个人 / 机构账号、自研模型、数据集、在线应用、技术标签、下载量、收藏、开发框架信息。</div>
+            </div>
+            <div class="source-item">
+              <div class="src-tag">SOURCE 03 · ACADEMIC</div>
+              <div class="src-name">学术渠道</div>
+              <div class="src-desc">论文、研究机构、研究领域、学者主页；覆盖谷歌学术、Semantic Scholar、ORCID、DBLP、OpenReview、OpenAlex。</div>
+            </div>
+            <div class="source-item">
+              <div class="src-tag">SOURCE 04 · PROFESSIONAL</div>
+              <div class="src-name">职业商业数据</div>
+              <div class="src-desc">完整从业履历、在职企业、岗位、教育背景、领英、Crunchbase 等职业平台公开资料。</div>
+            </div>
+            <div class="source-item">
+              <div class="src-tag">SOURCE 05 · OPEN WEB</div>
+              <div class="src-name">全网公开网页</div>
+              <div class="src-desc">个人职业主页、技术博客、各类可检索公开佐证材料。</div>
+            </div>
+            <div class="source-item">
+              <div class="src-tag">SOURCE 06 · USER SUBMIT</div>
+              <div class="src-name">用户自主提交数据</div>
+              <div class="src-desc">用户授权绑定账号、手动补充资料、DINQ 个人主页 Page 与作品集。</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>18 · DATA SOURCES</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 19 · 数据时效 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="19 Freshness">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">06 · Freshness &amp; Provenance</div>
+            <h1 class="slide-title">数据时效性<br>与溯源可信度</h1>
+            <h2 class="slide-subtitle">DINQ 核心优势并非单纯抓取原始公开数据，而是将海量碎片化信息标准化处理，生成可检索、可评估、<span style="color: var(--accent); font-weight: 500;">每条信息均可溯源</span>的人才知识图谱。</h2>
+          </div>
+          <div class="right">UPDATE FREQUENCY</div>
+        </div>
+        <div class="body" style="overflow-y: auto; padding-bottom: 8px;">
+          <ul class="bullets" style="gap: 10px;">
+            <li>
+              <div class="num">GH</div>
+              <div class="txt">
+                <strong>GitHub</strong>
+                <span>开发者实时动态持续采集，项目活跃度数据每 6 小时汇总更新；优质开发者账号、代码仓库信息每 20–30 分钟同步。</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">HF</div>
+              <div class="txt">
+                <strong>Hugging Face</strong>
+                <span>模型、数据集、在线应用每 30 分钟更新；个人/组织主页每小时同步；GitHub/Hugging Face 搜索索引每 5 分钟增量刷新。</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">AC</div>
+              <div class="txt">
+                <strong>学术平台</strong>
+                <span>论文数据每 30 分钟增量补充；学者档案信息每日统一完善修正。</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">WB</div>
+              <div class="txt">
+                <strong>全网公开网页 &amp; 职业数据</strong>
+                <span>用户发起检索时实时调取，时效由第三方公开索引决定。</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>19 · DATA FRESHNESS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 20 · 竞品对比 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="20 Competition">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">07 · Competition Map</div>
+            <h1 class="slide-title">竞品横向对比<br>DINQ 差异化定位</h1>
+          </div>
+          <div class="right">5 COMPETITORS</div>
+        </div>
+        <div class="body">
+          <table class="compare">
+            <thead>
+              <tr>
+                <th>产品/类别</th>
+                <th>核心能力</th>
+                <th>关键短板</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="name"><div class="brand-lockup"><img src="../logos/logo-linkedin.svg" alt="LinkedIn logo" /><div class="brand-text"><strong>领英</strong><span>LinkedIn</span></div></div></td>
+                <td>职业社交档案，全球最大商业人脉网络</td>
+                <td>信息仅用户自主填写，无代码、论文、跨平台技术成果佐证</td>
+              </tr>
+              <tr>
+                <td class="name"><div class="brand-lockup"><img src="../logos/logo-exa-icon.png" alt="Exa logo" /><div class="brand-text"><strong>Exa</strong><span>Search</span></div></div></td>
+                <td>检索速度快，适合通用岗位初步筛选</td>
+                <td>仅返回网页链接，缺少人才智能分析、账号合并、信息核验能力</td>
+              </tr>
+              <tr>
+                <td class="name"><div class="brand-lockup"><img src="../logos/logo-exa-icon.png" alt="Exa logo" /><div class="brand-text"><strong>Exa</strong><span>Websets</span></div></div></td>
+                <td>AI 自动核验能力突出，英文、时效类检索效果优异</td>
+                <td>高度依赖领英数据，不支持文件上传，中文复杂需求匹配薄弱</td>
+              </tr>
+              <tr>
+                <td class="name"><div class="brand-lockup"><img class="logo-wide" src="../logos/logo-juicebox.svg" alt="Juicebox logo" /><div class="brand-text"><strong>PeopleGPT</strong><span>Juicebox</span></div></div></td>
+                <td>通用海外人才工具</td>
+                <td>中文语义、地域识别、多条件逻辑推理存在明显缺陷</td>
+              </tr>
+              <tr>
+                <td class="name"><div class="brand-lockup"><div class="logo-ats">ATS</div><div class="brand-text"><strong>ATS</strong><span>招聘系统</span></div></div></td>
+                <td>仅管理招聘流程</td>
+                <td>不具备人才挖掘、资料补全、技术能力评估、定制沟通文案能力</td>
+              </tr>
+              <tr class="row-dinq">
+                <td class="name"><div class="brand-lockup"><img class="logo-dinq" src="../logos/logo-dinq-new.jpg" alt="DINQ logo"><div class="brand-text"><strong>DINQ</strong><span>AI Talent Search</span></div></div></td>
+                <td class="dinq">一站式 AI 人才搜索引擎，完整覆盖 Search / API Playground / Talent Radar / Shortlist / Integration / Page / Organization 全模块</td>
+                <td class="dinq">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>20 · COMPETITION MAP</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 21 · 竞品实测 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="21 Benchmark">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">07 · Benchmark Results</div>
+            <h1 class="slide-title">竞品实测结论<br>复杂招聘需求拉开产品差距</h1>
+            <h2 class="slide-subtitle">基于 14 组标准化测试需求横向测评，DINQ 在复杂语义解析、中文适配、多格式文件识别、虚假信息过滤四大维度优势显著。</h2>
+          </div>
+          <div class="right">4 SCENARIOS</div>
+        </div>
+        <div class="body">
+          <div class="bench-wrap">
+            <div class="bench-kpis">
+              <div class="bench-kpi">
+                <div class="k-tag">ADVANTAGE 01</div>
+                <div class="k-name">复杂语义解析</div>
+                <div class="k-bar"></div>
+              </div>
+              <div class="bench-kpi">
+                <div class="k-tag">ADVANTAGE 02</div>
+                <div class="k-name">中文需求适配</div>
+                <div class="k-bar"></div>
+              </div>
+              <div class="bench-kpi">
+                <div class="k-tag">ADVANTAGE 03</div>
+                <div class="k-name">多格式文件识别</div>
+                <div class="k-bar"></div>
+              </div>
+              <div class="bench-kpi">
+                <div class="k-tag">ADVANTAGE 04</div>
+                <div class="k-name">虚假信息过滤</div>
+                <div class="k-bar"></div>
+              </div>
+            </div>
+            <div class="bench-grid">
+              <div class="bench-table">
+                <div class="bench-row head">
+                  <div class="bench-cell">测试场景</div>
+                  <div class="bench-cell">竞品实测表现</div>
+                  <div class="bench-cell">DINQ 关键优势</div>
+                </div>
+                <div class="bench-row">
+                  <div class="bench-cell"><strong>通用标准岗位</strong><span>基础岗位匹配</span></div>
+                  <div class="bench-cell">DINQ 与 Exa Websets 匹配精度持平；Exa Search 检索速度更快。</div>
+                  <div class="bench-cell accent"><strong>人才信息完整度更高</strong><span>候选人背景、来源与技术证据更完整。</span></div>
+                </div>
+                <div class="bench-row">
+                  <div class="bench-cell"><strong>口语化 / 主观需求</strong><span>模糊画像解析</span></div>
+                  <div class="bench-cell">可处理「年轻资深技术负责人」「大厂离职自主创业失败技术人才」等非标准描述。</div>
+                  <div class="bench-cell accent"><strong>自然语言转人才画像</strong><span>从表述意图推导角色、经历与能力约束。</span></div>
+                </div>
+                <div class="bench-row">
+                  <div class="bench-cell"><strong>复合推理</strong><span>多轮交叉验证</span></div>
+                  <div class="bench-cell">对从业时间、职业经历、公开证据进行多工具验证，避免单点误判。</div>
+                  <div class="bench-cell accent"><strong>过滤虚假匹配</strong><span>用公开证据闭环支撑候选人推荐。</span></div>
+                </div>
+                <div class="bench-row">
+                  <div class="bench-cell"><strong>文件输入</strong><span>PDF / 截图 OCR</span></div>
+                  <div class="bench-cell">招聘文档、截图可直接作为需求输入，减少人工改写与信息损耗。</div>
+                  <div class="bench-cell accent"><strong>核心差异化能力</strong><span>独家支持多格式招聘材料识别。</span></div>
+                </div>
+              </div>
+              <div class="bench-side">
+                <div class="bench-note">
+                  <div class="note-num">14</div>
+                  <div class="note-title">组标准化测试需求</div>
+                  <div class="note-text">复杂招聘场景会迅速放大产品差距。DINQ 的优势不只是找到人，而是把模糊需求、候选证据、档案完整度和后续工作流连接起来。</div>
+                </div>
+                <div class="bench-note" style="border-color:rgba(15,23,42,0.10);background:rgba(255,255,255,0.78);box-shadow:0 14px 34px rgba(10,14,26,0.045);">
+                  <div class="note-title" style="font-size:20px;">结论</div>
+                  <div class="note-text">标准岗位差异不大；一旦需求变得口语化、复合化、中文化、文件化，DINQ 的解析和核验能力开始拉开差距。</div>
+                </div>
+              </div>
+            </div>
+            <div class="bench-flow">
+              <div class="flow-label">WORKFLOW UPGRADE</div>
+              <div class="flow-chip">Search</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-chip">API Playground</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-chip">Integration</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-chip">Shortlist</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-chip">Talent Radar</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>21 · BENCHMARK</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 22 · 品牌背书 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="22 Endorsement">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">08 · Endorsement</div>
+            <h1 class="slide-title">品牌背书<br>生态 · 客户 · 媒体认可</h1>
+            <h2 class="slide-subtitle">DINQ 获得全球顶尖 AI 与云计算生态支持，头部企业和专业人才已率先入驻平台，并获数十家国际主流媒体报道。</h2>
+          </div>
+          <div class="right">3 DIMENSIONS</div>
+        </div>
+        <div class="body">
+          <div class="col-2" style="gap: 40px;align-items:stretch;">
+            <div style="display: flex; flex-direction: column; gap: 18px;">
+              <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">01 · 全球顶级孵化器成员</div>
+              <div class="endorse-logo-grid">
+                <div class="endorse-logo"><img src="../logos/logo-nvidia.svg" alt="NVIDIA logo"></div>
+                <div class="endorse-logo" style="font-size:18px;font-weight:760;color:var(--fg-strong);">AWS</div>
+                <div class="endorse-logo"><img src="../logos/logo-google-cloud.svg" alt="Google Cloud logo"></div>
+              </div>
+              <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">02 · 顶尖人才入驻</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">DeepSeek</div>
+                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">Qwen</div>
+                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">OpenAI</div>
+                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">Meta</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">03 · 行业媒体公开宣发</div>
+              <div style="font-size: 14px; line-height: 1.55; color: var(--muted); margin-bottom: 12px;">DINQ 面向全球发布 AI 原生职业人才平台官方新闻通稿，覆盖北美及全球财经、科技主流媒体分发渠道：</div>
+              <div style="font-size: 16px; line-height: 2; color: var(--fg);">雅虎财经 · 美联社 · MarketWatch · 环球邮报 · TradingView · EQS 资讯 · Digital Journal · 国际商业时报</div>
+              <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);">
+                <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--muted-soft);">合规提示：所列机构仅为平台注册、试用用户所属企业示例，不构成官方合作、客户签约、品牌背书。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>22 · ENDORSEMENT</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 23 · 核心团队 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="23 Team">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">09 · Core Team</div>
+            <h1 class="slide-title">核心团队<br>AI 社区深耕 + 企业服务双重经验</h1>
+            <h2 class="slide-subtitle">团队兼具 AI 开源社区影响力与 B2B SaaS 规模化运营经验，汇聚全球顶级人才市场战略视野。</h2>
+          </div>
+          <div class="right">3 MEMBERS</div>
+        </div>
+        <div class="body">
+          <div class="col-3" style="gap: 28px;">
+            <div class="team-card">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
+                <div style="width:44px;height:44px;border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--accent);background:var(--surface-2);flex-shrink:0;">SG</div>
+                <div><div class="team-name">高岱恒 <span class="team-en">Sam Gao</span></div></div>
+              </div>
+              <div class="team-role">创始人 &amp; CEO</div>
+              <div class="team-bio">中科大博士，前阿里达摩院研究员，开源社区知名贡献者。开源项目 DeepFaceLab 为 2020 GitHub 全球 Top2 项目（46K 点赞），Eliza OS 白皮书月度热度第一；运营 2 万+ 中文 AI 研究者社区。</div>
+              <div class="team-logo-row">
+                <div class="team-logo-chip icon"><img src="../logos/logo-qingke.png" alt="Qingke logo"></div>
+                <div class="team-logo-chip damo"><img src="../logos/logo-damo-academy.webp" alt="Damo Academy logo"></div>
+              </div>
+            </div>
+            <div class="team-card">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
+                <div style="width:44px;height:44px;border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--accent);background:var(--surface-2);flex-shrink:0;">KS</div>
+                <div><div class="team-name">孙辰昕 <span class="team-en">Kelvin Sun</span></div></div>
+              </div>
+              <div class="team-role">联合创始人</div>
+              <div class="team-bio">悉尼大学硕士，招聘基础设施赛道连续创业者。曾任职红杉资本、光源资本人力资源管理，深耕人才系统搭建、B2B SaaS 商业化规模化运营。</div>
+              <div class="team-logo-row">
+                <div class="team-logo-chip"><img src="../logos/logo-hongshan.png" alt="HongShan logo"></div>
+                <div class="team-logo-chip"><img src="../logos/logo-thomson-reuters.png" alt="Thomson Reuters logo"></div>
+              </div>
+            </div>
+            <div class="team-card">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
+                <div style="width:44px;height:44px;border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--accent);background:var(--surface-2);flex-shrink:0;">JL</div>
+                <div><div class="team-name">陆坚 <span class="team-en">Jian Lu</span></div></div>
+              </div>
+              <div class="team-role">战略顾问</div>
+              <div class="team-bio">达特茅斯博士，前领英中国区总裁、CGL 全球首席咨询合伙人；清华苏世民学院导师，拥有全球化人才市场战略视野与人脉资源。</div>
+              <div class="team-logo-row">
+                <div class="team-logo-chip icon"><img src="../logos/logo-cgl.jpeg" alt="CGL logo"></div>
+                <div class="team-logo-chip"><img src="../logos/logo-linkedin.svg" alt="LinkedIn logo"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>23 · CORE TEAM</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 24 · 适用场景 ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="24 Use Cases">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">10 · Use Cases</div>
+            <h1 class="slide-title">DINQ 适用<br>核心业务场景</h1>
+          </div>
+          <div class="right">11 SCENARIOS</div>
+        </div>
+        <div class="body">
+          <div class="col-2" style="gap: 48px;">
+            <div>
+              <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px;">A · 科技 · 科研 · 投资</div>
+              <ul class="bullets" style="gap: 12px;">
+                <li>
+                  <div class="num">01</div>
+                  <div class="txt"><strong>全行业高精尖技术人才寻访</strong><span>AI、半导体、芯片、生物医药、底层架构等，可调取开源、学术深度成果</span></div>
+                </li>
+                <li>
+                  <div class="num">02</div>
+                  <div class="txt"><strong>开源社区活跃贡献者识别</strong><span>Hugging Face 与 GitHub 活跃贡献者</span></div>
+                </li>
+                <li>
+                  <div class="num">03</div>
+                  <div class="txt"><strong>复合型人才寻访</strong><span>兼具研究、工程、团队管理、对外表达能力</span></div>
+                </li>
+                <li>
+                  <div class="num">04</div>
+                  <div class="txt"><strong>投资机构/初创团队合伙人寻访</strong><span>技术合伙人、行业顾问、核心早期员工</span></div>
+                </li>
+                <li>
+                  <div class="num">05</div>
+                  <div class="txt"><strong>猎头/招聘平台/企业 ATS</strong><span>通过 Integration 接入底层人才检索能力</span></div>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px;">B · 实体 · 消费 · 跨境</div>
+              <ul class="bullets" style="gap: 12px;">
+                <li>
+                  <div class="num">06</div>
+                  <div class="txt"><strong>实验室/开源社区/专业机构</strong><span>搭建 Page / Organization 主页沉淀团队成果</span></div>
+                </li>
+                <li>
+                  <div class="num">07</div>
+                  <div class="txt"><strong>实体制造/农牧/乳制品工厂管理类</strong><span>厂长、生产管理、技术负责人寻访</span></div>
+                </li>
+                <li>
+                  <div class="num">08</div>
+                  <div class="txt"><strong>消费品牌线下渠道负责人</strong><span>高端品类渠道专家挖掘</span></div>
+                </li>
+                <li>
+                  <div class="num">09</div>
+                  <div class="txt"><strong>海外本地 KOL/跨境新媒体运营</strong><span>多国本地化人才、海外内容运营</span></div>
+                </li>
+                <li>
+                  <div class="num">10</div>
+                  <div class="txt"><strong>全球落地经验 GTM 负责人</strong><span>跨境市场拓展、海外商业化人才</span></div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>24 · USE CASES</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 25 · Closing ===== -->
+      <section class="slide s-closing grid-bg" data-screen-label="25 Closing">
+        <span class="corner-dot tl"></span>
+        <span class="corner-dot tr"></span>
+        <span class="corner-dot bl"></span>
+        <span class="corner-dot br"></span>
+        <div class="closing-inner">
+          <div class="cover-top" style="display: flex; justify-content: space-between; align-items: center; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 14px; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase;">
+            <div style="font-family: 'SF Pro Display', system-ui, sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: var(--fg-strong); text-transform: none;">DINQ<span style="color: var(--accent);">.</span></div>
+            <div>11 · Conclusion · 总结与展望</div>
+          </div>
+          <div class="closing-main">
+            <div class="cover-eyebrow" style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 18px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; display: flex; align-items: center; gap: 18px;">
+              <span style="width: 60px; height: 1px; background: var(--accent); display: inline-block;"></span>
+              Thank you
+            </div>
+            <h1 class="closing-title">谢谢<br><span class="accent">欢迎访问</span></h1>
+            <div class="closing-sub">了解 AI 时代人才寻访体系。</div>
+            <a class="closing-url" href="https://dinq.me/" target="_blank" rel="noopener">
+              <span class="url-label">Visit our page</span>
+              <span class="url-text">https://dinq.me/</span>
+            </a>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 32px; border-top: 1px solid var(--border); font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 14px; letter-spacing: 0.2em; color: var(--muted-soft); text-transform: uppercase;">
+            <div>AI Native Talent Search · © 2026</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 26 · Appendix ===== -->
+
+
+    </div>
+  </div>
+
+  <nav class="deck-counter" role="navigation" aria-label="Deck navigation">
+    <button type="button" id="deck-prev" aria-label="Previous slide">‹</button>
+    <span class="deck-count"><span id="deck-cur" aria-live="polite" aria-atomic="true">01</span> <span class="total">/ <span id="deck-total">01</span></span></span>
+    <button type="button" id="deck-next" aria-label="Next slide">›</button>
+  </nav>
+  <div class="deck-hint">← / → · space</div>
+
+  <script>
+    (function () {
+      var stage = document.getElementById('deck-stage');
+      var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+      var prev = document.getElementById('deck-prev');
+      var next = document.getElementById('deck-next');
+      var cur = document.getElementById('deck-cur');
+      var total = document.getElementById('deck-total');
+      var STORE = 'deck:idx:' + (location.pathname || '/');
+      var idx = 0;
+      function fit() {
+        var sw = window.innerWidth;
+        var pad = 48;
+        var s = Math.min((sw - pad) / 1920, 1);
+        if (!isFinite(s) || s <= 0) s = 1;
+        stage.style.transform = 'none';
+        stage.style.zoom = s;
+      }
+      function pad2(n) { return (n < 10 ? '0' : '') + n; }
+      function paint() {
+        if (cur) cur.textContent = pad2(idx + 1);
+        if (total) total.textContent = pad2(slides.length);
+        if (prev) prev.toggleAttribute('disabled', idx <= 0);
+        if (next) next.toggleAttribute('disabled', idx >= slides.length - 1);
+      }
+      function go(i) {
+        idx = Math.max(0, Math.min(slides.length - 1, i));
+        paint();
+        if (slides[idx]) slides[idx].scrollIntoView({ block: 'start', behavior: 'smooth' });
+        try { localStorage.setItem(STORE, String(idx)); } catch (_) {}
+      }
+      function onKey(e) {
+        var t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(idx + 1); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(idx - 1); }
+        else if (e.key === 'Home') { e.preventDefault(); go(0); }
+        else if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+      }
+      window.addEventListener('keydown', onKey, true);
+      if (prev) prev.addEventListener('click', function () { go(idx - 1); });
+      if (next) next.addEventListener('click', function () { go(idx + 1); });
+      document.body.setAttribute('tabindex', '-1');
+      document.body.style.outline = 'none';
+      function focusDeck() { try { window.focus(); document.body.focus({ preventScroll: true }); } catch (_) {} }
+      document.addEventListener('mousedown', focusDeck);
+      window.addEventListener('load', focusDeck);
+      try {
+        var saved = parseInt(localStorage.getItem(STORE) || '0', 10);
+        if (!isNaN(saved) && saved >= 0 && saved < slides.length) idx = saved;
+      } catch (_) {}
+      window.addEventListener('resize', fit);
+      fit();
+      paint();
+      focusDeck();
+    })();
+  </script>
+
+
+</body></html>
