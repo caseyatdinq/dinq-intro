@@ -1050,23 +1050,23 @@
       display: flex; flex-direction: column; justify-content: space-between;
     }
     .s-closing .closing-main {
-      display: flex; flex-direction: column; gap: 40px;
+      display: flex; flex-direction: column; gap: 42px;
     }
     .s-closing h1.closing-title {
       font-family: 'SF Pro Display', system-ui, sans-serif;
-      font-size: 96px; font-weight: 700;
+      font-size: 120px; font-weight: 700;
       line-height: 1.0; letter-spacing: -0.03em;
       color: var(--fg-strong);
       max-width: 1500px;
     }
     .s-closing h1.closing-title .accent { color: var(--accent); }
     .s-closing .closing-sub {
-      font-size: 22px; line-height: 1.55; color: var(--muted);
-      max-width: 1000px;
+      font-size: 32px; line-height: 1.45; color: var(--muted);
+      max-width: 860px;
     }
     .s-closing .closing-values {
       display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 32px; margin-top: 40px;
+      gap: 32px; margin-top: 18px;
     }
     .s-closing .value-card {
       border-top: 1px solid var(--accent);
@@ -1083,13 +1083,39 @@
       color: var(--fg-strong);
     }
     .s-closing .value-card .vc-desc {
-      font-size: 16px; line-height: 1.6; color: var(--muted);
+      font-size: 17px; line-height: 1.45; color: var(--muted);
     }
     .s-closing .closing-url {
+      margin-top: 10px;
+      width: fit-content;
+      min-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 36px;
+      padding: 30px 38px;
+      border: 1px solid rgba(231, 90, 8, 0.28);
+      background: rgba(231, 90, 8, 0.08);
+      box-shadow: 0 22px 56px rgba(231, 90, 8, 0.12);
+      color: var(--fg-strong);
+      text-decoration: none;
+    }
+    .s-closing .closing-url .url-label {
       font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-      font-size: 18px; letter-spacing: 0.18em;
+      font-size: 13px;
+      letter-spacing: 0.22em;
       color: var(--accent);
       text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .s-closing .closing-url .url-text {
+      font-family: 'SF Pro Display', system-ui, sans-serif;
+      font-size: 62px;
+      line-height: 1;
+      font-weight: 720;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+      white-space: nowrap;
     }
 
   </style>
@@ -2519,30 +2545,17 @@
           <div class="closing-main">
             <div class="cover-eyebrow" style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 18px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; display: flex; align-items: center; gap: 18px;">
               <span style="width: 60px; height: 1px; background: var(--accent); display: inline-block;"></span>
-              DINQ · 总结与展望
+              Thank you
             </div>
-            <h1 class="closing-title">DINQ 重构<br>AI时代人才<span class="accent">寻访体系</span></h1>
-            <div class="closing-sub">传统招聘仅依靠简历、关键词筛选候选人；DINQ 将学术论文、开源代码、落地项目、行业人脉等真实技术成果，转化为可检索、可评估、可触达的标准化人才数据。</div>
-            <div class="closing-values">
-              <div class="value-card">
-                <div class="vc-tag">VALUE 01</div>
-                <div class="vc-name">精准定位</div>
-                <div class="vc-desc">依托搜索 Search，自然语言描述，快速匹配复杂复合型技术人才画像</div>
-              </div>
-              <div class="value-card">
-                <div class="vc-tag">VALUE 02</div>
-                <div class="vc-name">客观评判</div>
-                <div class="vc-desc">依托真实可溯源技术产出，客观评估候选人硬实力</div>
-              </div>
-              <div class="value-card">
-                <div class="vc-tag">VALUE 03</div>
-                <div class="vc-name">长效运营</div>
-                <div class="vc-desc">依托 Shortlist、Talent Radar、API Playground 和 Integration，搭建长期可持续人才寻访管线</div>
-              </div>
-            </div>
+            <h1 class="closing-title">谢谢<br><span class="accent">欢迎访问</span></h1>
+            <div class="closing-sub">了解 AI 时代人才寻访体系。</div>
+            <a class="closing-url" href="https://dinq.me/" target="_blank" rel="noopener">
+              <span class="url-label">Visit our page</span>
+              <span class="url-text">https://dinq.me/</span>
+            </a>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 32px; border-top: 1px solid var(--border); font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 14px; letter-spacing: 0.2em; color: var(--muted-soft); text-transform: uppercase;">
-            <div>AI Native · Talent Search Platform · © 2026 DINQ</div>
+            <div>AI Native Talent Search · © 2026</div>
           </div>
         </div>
       </section>
