@@ -922,10 +922,10 @@
     }
     .logo-cat-head {
       font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-      font-size: 13px; letter-spacing: 0.18em;
+      font-size: 15px; letter-spacing: 0.16em;
       color: var(--accent);
       text-transform: uppercase;
-      padding-bottom: 12px;
+      padding-bottom: 16px;
       border-bottom: 1px solid var(--border-strong);
     }
     .logo-cat-list {
@@ -937,46 +937,54 @@
       gap: 22px;
     }
     .adopter-card {
-      min-height: 338px;
+      min-height: 330px;
       border: 1px solid rgba(15, 23, 42, 0.10);
       border-radius: 18px;
       background: rgba(255, 255, 255, 0.58);
-      padding: 24px 22px 22px;
-      display: flex; flex-direction: column; gap: 18px;
+      padding: 28px 22px 24px;
+      display: flex; flex-direction: column; gap: 22px;
       box-shadow: 0 18px 42px rgba(10, 14, 26, 0.04);
     }
-    .adopter-title {
-      font-size: 22px; font-weight: 760;
-      color: var(--fg-strong);
-      line-height: 1.2;
-    }
     .adopter-list {
-      font-size: 14px; line-height: 1.58;
+      font-size: 16px; line-height: 1.62;
       color: var(--muted);
-      min-height: 68px;
+      min-height: 78px;
     }
     .adopter-logos {
       margin-top: auto;
-      display: flex; align-items: center; align-content: center;
-      gap: 16px 20px; flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+      gap: 14px 18px;
+    }
+    .adopter-logos.three-up {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
     }
     .logo-tile {
-      min-height: 54px;
+      width: 100%;
+      min-width: 0;
+      height: 58px;
       border: 0;
       border-radius: 0;
       background: transparent;
       display: flex; align-items: center; justify-content: center;
       padding: 0;
+      overflow: hidden;
     }
     .logo-tile img {
-      max-width: 118px; max-height: 48px;
+      max-width: 128px; max-height: 48px;
       width: auto; height: auto;
       object-fit: contain;
       display: block;
+      flex: 0 1 auto;
     }
     .logo-tile.logo-tall img { max-height: 62px; }
-    .logo-tile.logo-wide img { max-width: 148px; max-height: 44px; }
-    .logo-tile.logo-small img { max-width: 82px; max-height: 44px; }
+    .logo-tile.logo-wide img { max-width: 146px; max-height: 44px; }
+    .logo-tile.logo-small img { max-width: 74px; max-height: 44px; }
+    .logo-tile.logo-text img { max-width: 118px; max-height: 38px; }
+    .adopter-logos.three-up .logo-tile img { max-width: 96px; max-height: 42px; }
+    .adopter-logos.three-up .logo-tile.logo-wide img { max-width: 106px; max-height: 40px; }
     .endorse-logo-grid {
       display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 14px;
@@ -1042,6 +1050,63 @@
       font-size: 16px; line-height: 1.55;
       color: var(--muted);
     }
+
+    .shortlist-lens {
+      position: absolute;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 360px;
+      padding: 18px 26px 18px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 26px 24px, rgba(255,255,255,0.96), rgba(255,255,255,0.76) 48%, rgba(255,255,255,0.58)),
+        rgba(255, 255, 255, 0.68);
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      box-shadow:
+        0 28px 70px rgba(10, 14, 26, 0.18),
+        0 0 0 1px rgba(231, 90, 8, 0.10),
+        inset 0 1px 0 rgba(255,255,255,0.88);
+    }
+    .shortlist-lens::before {
+      content: '';
+      width: 54px;
+      height: 54px;
+      border: 4px solid var(--accent);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95) 0 18%, rgba(231,90,8,0.10) 19% 100%);
+      box-shadow:
+        0 0 0 8px rgba(231,90,8,0.09),
+        0 10px 26px rgba(231,90,8,0.20);
+      flex: 0 0 auto;
+    }
+    .shortlist-lens::after {
+      content: '';
+      position: absolute;
+      left: 63px;
+      top: 58px;
+      width: 30px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      transform: rotate(45deg);
+      box-shadow: 0 8px 18px rgba(231,90,8,0.24);
+    }
+    .shortlist-lens .lens-text {
+      font-size: 24px;
+      font-weight: 780;
+      line-height: 1.18;
+      color: var(--fg-strong);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .shortlist-lens.lens-left { left: 38px; top: 32px; }
+    .shortlist-lens.lens-top { right: 356px; top: 30px; min-width: 390px; }
+    .shortlist-lens.lens-bottom { right: 74px; bottom: 40px; min-width: 360px; }
 
     /* Closing slide */
     .s-closing { padding: 0; background: var(--surface-2); }
@@ -1257,9 +1322,8 @@
           <div class="adopter-grid">
             <div class="adopter-card">
               <div class="logo-cat-head">AI 科研机构 · AI Research</div>
-              <div class="adopter-title">AI / 研究</div>
               <div class="adopter-list">智谱华章 · Synapse AI<br>EDGE Agentic Labs · KoreTech</div>
-              <div class="adopter-logos">
+              <div class="adopter-logos three-up">
                 <div class="logo-tile"><img src="logos/logo-zhipu.png" alt="Zhipu AI logo"></div>
                 <div class="logo-tile"><img src="logos/logo-edge.jpeg" alt="EDGE Agentic Labs logo"></div>
                 <div class="logo-tile logo-wide"><img src="logos/logo-damo-header.svg" alt="KoreTech logo"></div>
@@ -1267,20 +1331,16 @@
             </div>
             <div class="adopter-card">
               <div class="logo-cat-head">国内企业 · Enterprise</div>
-              <div class="adopter-title">Enterprise</div>
-              <div class="adopter-list">蚂蚁集团 · 心动 XD · 字节跳动<br>腾讯 · 京东 · THANK Talent</div>
+              <div class="adopter-list">蚂蚁集团 · 字节跳动<br>腾讯 · 京东</div>
               <div class="adopter-logos">
                 <div class="logo-tile logo-wide"><img src="logos/logo-antgroup.jpeg" alt="Ant Group logo"></div>
-                <div class="logo-tile logo-small"><img src="logos/logo-xd.png" alt="XD logo"></div>
                 <div class="logo-tile logo-wide"><img src="logos/logo-bytedance.svg" alt="ByteDance logo"></div>
                 <div class="logo-tile logo-wide"><img src="logos/logo-tencent.svg" alt="Tencent logo"></div>
-                <div class="logo-tile logo-small"><img src="logos/logo-jd.svg" alt="JD.com logo"></div>
-                <div class="logo-tile logo-wide"><img src="logos/logo-thank.jpeg" alt="THANK Talent logo"></div>
+                <div class="logo-tile logo-text"><img src="logos/logo-jd.svg" alt="JD.com logo"></div>
               </div>
             </div>
             <div class="adopter-card">
               <div class="logo-cat-head">创投基金 · Venture Capital</div>
-              <div class="adopter-title">VC / PE</div>
               <div class="adopter-list">顺为资本 · 清新资本<br>NYX Ventures</div>
               <div class="adopter-logos">
                 <div class="logo-tile logo-tall"><img src="logos/logo-shunwei.png" alt="Shunwei Capital logo"></div>
@@ -1289,9 +1349,8 @@
             </div>
             <div class="adopter-card">
               <div class="logo-cat-head">海外团队 &amp; 猎头 · Overseas</div>
-              <div class="adopter-title">Global Teams / Agencies</div>
               <div class="adopter-list">SPM · Agrícola Campolor<br>Vivende Inmobiliaria</div>
-              <div class="adopter-logos">
+              <div class="adopter-logos three-up">
                 <div class="logo-tile"><img src="logos/logo-spm.jpeg" alt="SPM Agency logo"></div>
                 <div class="logo-tile logo-wide"><img src="logos/logo-campolor.webp" alt="Agricola Campolor logo"></div>
                 <div class="logo-tile"><img src="logos/logo-vivende.png" alt="Vivende Inmobiliaria logo"></div>
@@ -2015,17 +2074,14 @@
               object-fit:contain;
             "
           />
-          <div style="position:absolute;left:42px;top:46px;width:300px;display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid rgba(255,255,255,0.70);border-radius:999px;background:rgba(255,255,255,0.54);backdrop-filter:blur(18px) saturate(165%);-webkit-backdrop-filter:blur(18px) saturate(165%);box-shadow:0 18px 48px rgba(10,14,26,0.12);">
-            <div style="width:30px;height:30px;border:2px solid rgba(231,90,8,0.85);border-radius:50%;position:relative;flex:0 0 auto;"><span style="position:absolute;width:13px;height:2px;background:rgba(231,90,8,0.85);right:-8px;bottom:1px;transform:rotate(45deg);border-radius:2px;"></span></div>
-            <div style="font-size:19px;font-weight:700;color:var(--fg-strong);line-height:1.25;">批量操作</div>
+          <div class="shortlist-lens lens-left">
+            <div class="lens-text">批量操作</div>
           </div>
-          <div style="position:absolute;right:390px;top:54px;width:330px;display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid rgba(255,255,255,0.70);border-radius:999px;background:rgba(255,255,255,0.54);backdrop-filter:blur(18px) saturate(165%);-webkit-backdrop-filter:blur(18px) saturate(165%);box-shadow:0 18px 48px rgba(10,14,26,0.12);">
-            <div style="width:30px;height:30px;border:2px solid rgba(231,90,8,0.85);border-radius:50%;position:relative;flex:0 0 auto;"><span style="position:absolute;width:13px;height:2px;background:rgba(231,90,8,0.85);right:-8px;bottom:1px;transform:rotate(45deg);border-radius:2px;"></span></div>
-            <div style="font-size:19px;font-weight:700;color:var(--fg-strong);line-height:1.25;">全流程状态追踪</div>
+          <div class="shortlist-lens lens-top">
+            <div class="lens-text">全流程状态追踪</div>
           </div>
-          <div style="position:absolute;right:96px;bottom:58px;width:330px;display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid rgba(255,255,255,0.70);border-radius:999px;background:rgba(255,255,255,0.54);backdrop-filter:blur(18px) saturate(165%);-webkit-backdrop-filter:blur(18px) saturate(165%);box-shadow:0 18px 48px rgba(10,14,26,0.12);">
-            <div style="width:30px;height:30px;border:2px solid rgba(231,90,8,0.85);border-radius:50%;position:relative;flex:0 0 auto;"><span style="position:absolute;width:13px;height:2px;background:rgba(231,90,8,0.85);right:-8px;bottom:1px;transform:rotate(45deg);border-radius:2px;"></span></div>
-            <div style="font-size:19px;font-weight:700;color:var(--fg-strong);line-height:1.25;">长期资产沉淀</div>
+          <div class="shortlist-lens lens-bottom">
+            <div class="lens-text">长期资产沉淀</div>
           </div>
         </div>
         <div class="slide-foot">
