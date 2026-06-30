@@ -1,1 +1,3317 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DINQ · AI-Native Talent Search Platform</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --surface-2: #f3f4f6;
+      --fg: #1a1f2e;
+      --fg-strong: #0a0e1a;
+      --muted: #5d6373;
+      --muted-soft: #6b7280;
+      --border: rgba(10, 14, 26, 0.08);
+      --border-strong: rgba(10, 14, 26, 0.16);
+      --accent: #E75A08;
+      --accent-glow: rgba(231, 90, 8, 0.08);
+      --shell: #d8dade;
+      --font-sans: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-display: "SF Pro Display", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; min-height: 100%; overflow-x: hidden; overflow-y: auto;
+      background: var(--shell); color: var(--fg);
+      font: 18px/1.5 var(--font-sans);
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    .deck-shell {
+      min-height: 100vh;
+      overflow: visible;
+      padding: 32px 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .deck-stage {
+      width: 1920px; height: auto;
+      background: var(--bg);
+      position: relative;
+      transform-origin: top center;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .slide {
+      position: relative;
+      inset: auto;
+      overflow: hidden;
+      width: 1920px;
+      height: 1080px;
+      flex: 0 0 1080px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      box-shadow: 0 28px 72px rgba(10, 14, 26, 0.12);
+    }
 
+    .deck-counter {
+      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+      display: none; align-items: center; gap: 4px;
+      background: rgba(10, 14, 26, 0.92); backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 6px; border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #fff; font: 12px/1 var(--font-mono);
+      letter-spacing: 0.18em; z-index: 1000;
+    }
+    .deck-counter button {
+      width: 44px; height: 44px; background: transparent; color: #fff;
+      border: 0; border-radius: 50%; font-size: 18px; line-height: 1;
+      cursor: pointer; display: grid; place-items: center; transition: background 0.15s;
+    }
+    .deck-counter button:hover { background: rgba(255, 255, 255, 0.12); }
+    .deck-counter button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .deck-counter button[disabled] { opacity: 0.3; cursor: default; }
+    .deck-counter .deck-count { padding: 0 14px; letter-spacing: 0.22em; }
+    .deck-counter .deck-count .total { color: rgba(255, 255, 255, 0.5); }
+    .deck-hint {
+      position: fixed; bottom: 26px; right: 28px;
+      color: rgba(10, 14, 26, 0.45);
+      font: 11px/1 var(--font-mono);
+      letter-spacing: 0.2em; text-transform: uppercase;
+      z-index: 999; pointer-events: none;
+    }
+
+    @media print {
+      @page { size: 1920px 1080px; margin: 0; }
+      html, body { width: 1920px !important; height: auto !important; min-height: 0 !important; overflow: visible !important; background: #fff !important; }
+      .deck-shell { min-height: 0 !important; position: static !important; display: block !important; inset: auto !important; padding: 0 !important; overflow: visible !important; }
+      .deck-stage { display: block !important; width: 1920px !important; height: auto !important; transform: none !important; zoom: 1 !important; gap: 0 !important; box-shadow: none !important; position: static !important; }
+      .slide { display: flex !important; position: relative !important; inset: auto !important; width: 1920px !important; height: 1080px !important; min-height: 1080px !important; flex-basis: auto !important; margin: 0 !important; box-shadow: none !important; page-break-before: auto; page-break-after: auto; break-before: auto; break-after: auto; break-inside: avoid; }
+      .slide + .slide { page-break-before: always; break-before: page; }
+      .deck-counter, .deck-hint { display: none !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .deck-counter button { transition: none !important; }
+      .sticker-row *, .logo-sticker { transition: none !important; animation: none !important; }
+      .slide { animation: none !important; }
+    }
+  </style>
+  <style>
+    /* ===== Per-deck styles ===== */
+    .slide {
+      padding: 80px 100px;
+      color: var(--fg);
+      font-family: var(--font-sans);
+    }
+
+    /* Grid background — subtle, Adyen-style */
+    .grid-bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(10,14,26,0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(10,14,26,0.035) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+    }
+
+    /* Corner dots */
+    .corner-dot {
+      position: absolute; width: 8px; height: 8px;
+      background: var(--accent); border-radius: 1px;
+    }
+    .corner-dot.tl { top: 60px; left: 60px; }
+    .corner-dot.tr { top: 60px; right: 60px; }
+    .corner-dot.bl { bottom: 60px; left: 60px; }
+    .corner-dot.br { bottom: 60px; right: 60px; }
+
+    /* Top eyebrow line */
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .eyebrow-muted {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Slide header pattern */
+    .slide-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+    .slide-head .left { display: flex; flex-direction: column; gap: 12px; }
+    .slide-head .section-num {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+    .slide-head .right {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      color: var(--muted-soft);
+      text-transform: uppercase;
+    }
+
+    h1.slide-title {
+      font-family: var(--font-display);
+      font-size: 66px;
+      font-weight: 680;
+      line-height: 1.05;
+      letter-spacing: -0.026em;
+      color: var(--fg-strong);
+      max-width: 1400px;
+    }
+    h2.slide-subtitle {
+      font-size: 23px;
+      font-weight: 400;
+      line-height: 1.44;
+      color: var(--muted);
+      margin-top: 22px;
+      max-width: 1160px;
+    }
+
+    /* ===== Cover slide ===== */
+    .s-cover {
+      padding: 0;
+      background: var(--bg);
+    }
+    .s-cover .cover-inner {
+      position: relative; flex: 1; padding: 100px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      background: var(--surface);
+    }
+    .s-cover .cover-top {
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--font-mono);
+      font-size: 14px; letter-spacing: 0.22em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .s-cover .cover-logo {
+      font-family: var(--font-display);
+      font-size: 86px; font-weight: 760;
+      letter-spacing: -0.045em;
+      color: var(--fg-strong);
+      line-height: 0.9;
+    }
+    .s-cover .cover-logo .dot { color: var(--accent); }
+    .s-cover .cover-main {
+      display: flex; flex-direction: column; gap: 34px;
+      transform: translateY(-20px);
+    }
+    .s-cover .cover-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 18px; letter-spacing: 0.22em;
+      color: var(--accent);
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 18px;
+    }
+    .s-cover .cover-eyebrow::before {
+      content: ''; width: 60px; height: 1px; background: var(--accent);
+    }
+    .s-cover h1.cover-title {
+      font-family: var(--font-display);
+      font-size: 138px; font-weight: 730;
+      line-height: 0.94;
+      letter-spacing: -0.048em;
+      color: var(--fg-strong);
+      max-width: 1480px;
+    }
+    .s-cover h1.cover-title .accent { color: var(--accent); }
+    .s-cover .cover-sub {
+      font-size: 31px;
+      font-weight: 400;
+      line-height: 1.35;
+      color: var(--muted);
+      max-width: 1100px;
+    }
+    .s-cover .cover-foot {
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .s-cover .cover-tagline {
+      max-width: 980px;
+      font-family: var(--font-mono);
+      font-size: 18px;
+      line-height: 1.4;
+      letter-spacing: 0.16em;
+      color: var(--fg-strong);
+      text-transform: uppercase;
+      border-left: 0;
+      padding-left: 0;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .s-cover .cover-tagline::before {
+      content: '';
+      width: 64px;
+      height: 2px;
+      background: var(--accent);
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .s-cover .cover-meta {
+      font-family: var(--font-mono);
+      font-size: 13px; letter-spacing: 0.2em;
+      color: var(--muted-soft); text-align: right;
+      line-height: 2;
+      text-transform: uppercase;
+    }
+
+    /* ===== Section divider ===== */
+    .s-section {
+      padding: 0;
+      background: var(--surface-2);
+    }
+    .s-section .section-inner {
+      position: relative; flex: 1; padding: 100px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .s-section .section-top {
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--font-mono);
+      font-size: 14px; letter-spacing: 0.22em;
+      color: var(--muted); text-transform: uppercase;
+    }
+    .s-section .section-main {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 80px; align-items: end;
+    }
+    .s-section .section-text { display: flex; flex-direction: column; gap: 32px; }
+    .s-section .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 18px; letter-spacing: 0.22em;
+      color: var(--accent); text-transform: uppercase;
+      display: flex; align-items: center; gap: 18px;
+    }
+    .s-section .section-eyebrow::before {
+      content: ''; width: 60px; height: 1px; background: var(--accent);
+    }
+    .s-section h2.section-title {
+      font-family: var(--font-display);
+      font-size: 110px; font-weight: 700;
+      line-height: 0.95; letter-spacing: -0.03em;
+      color: var(--fg-strong); max-width: 1200px;
+    }
+    .s-section .section-desc {
+      font-size: 22px; line-height: 1.55; color: var(--muted);
+      max-width: 720px; margin-top: 8px;
+    }
+    .s-section .section-num-box {
+      width: 480px; height: 480px;
+      border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 360px; font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      position: relative;
+    }
+    .s-section .section-num-box::before,
+    .s-section .section-num-box::after {
+      content: ''; position: absolute;
+      width: 12px; height: 12px; background: var(--accent);
+    }
+    .s-section .section-num-box::before { top: -6px; left: -6px; }
+    .s-section .section-num-box::after { bottom: -6px; right: -6px; }
+    .s-section .section-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 32px; border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 14px; letter-spacing: 0.2em;
+      color: var(--muted-soft); text-transform: uppercase;
+    }
+
+    /* ===== Content layouts ===== */
+    .s-content { display: flex; flex-direction: column; }
+    .s-content .body { flex: 1; }
+
+    /* Two column: text left, screenshot/list right */
+    .col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+    .col-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 80px; }
+    .col-2-7-5 { display: grid; grid-template-columns: 7fr 5fr; gap: 80px; }
+    .col-2-5-7 { display: grid; grid-template-columns: 5fr 7fr; gap: 80px; }
+
+    /* Lead paragraph */
+    .lead {
+      font-size: 25px; line-height: 1.5;
+      color: var(--fg);
+      max-width: 1100px;
+      font-weight: 400;
+    }
+    .lead .accent { color: var(--accent); font-weight: 500; }
+
+    /* Bullet list — Adyen style */
+    ul.bullets { list-style: none; display: flex; flex-direction: column; gap: 28px; }
+    ul.bullets li {
+      display: grid; grid-template-columns: 48px 1fr;
+      gap: 8px; align-items: start;
+      font-size: 24px; line-height: 1.42;
+      color: var(--fg);
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    ul.bullets li:last-child { border-bottom: 0; }
+    ul.bullets li .num {
+      font-family: var(--font-mono);
+      font-size: 14px; letter-spacing: 0.1em;
+      color: var(--accent); padding-top: 8px;
+      font-weight: 500;
+    }
+    ul.bullets li .txt strong {
+      font-weight: 680; color: var(--fg-strong);
+      display: block; margin-bottom: 6px;
+      font-size: 25px;
+    }
+    ul.bullets li .txt span {
+      color: var(--muted); font-size: 20px; line-height: 1.42;
+    }
+
+    /* Plus-icon bullet (Adyen variant) */
+    ul.plus-bullets { list-style: none; display: flex; flex-direction: column; gap: 24px; }
+    ul.plus-bullets li {
+      display: grid; grid-template-columns: 40px 1fr;
+      gap: 16px; align-items: start;
+      font-size: 22px; line-height: 1.5;
+      color: var(--fg);
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    ul.plus-bullets li:last-child { border-bottom: 0; padding-bottom: 0; }
+    ul.plus-bullets li::before {
+      content: '';
+      width: 32px; height: 32px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      background-image:
+        linear-gradient(to right, var(--accent) 50%, transparent 50%),
+        linear-gradient(to bottom, var(--accent) 50%, transparent 50%);
+      background-size: 12px 1.5px, 1.5px 12px;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin-top: 4px;
+    }
+    ul.plus-bullets li strong {
+      font-weight: 600; color: var(--fg-strong);
+    }
+
+    /* Upgrade diagram — three-column cards with before → after */
+    .upgrade-diagram {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px;
+      margin-top: 18px;
+      align-items: stretch;
+    }
+    .upgrade-item {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.86)),
+        radial-gradient(circle at 100% 0%, rgba(231, 90, 8, 0.08), transparent 42%);
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 20px;
+      padding: 34px 34px 30px;
+      min-height: 338px;
+      display: flex; flex-direction: column; gap: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 22px 56px rgba(10, 14, 26, 0.07);
+    }
+    .upgrade-item::before {
+      content: '';
+      position: absolute; inset: 0 0 auto 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--accent) 0%, rgba(231, 90, 8, 0.52) 58%, rgba(231, 90, 8, 0.08) 100%);
+    }
+    .upg-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .upg-label {
+      font-size: 28px; color: var(--fg-strong);
+      font-weight: 700; letter-spacing: -0.01em;
+    }
+    .upg-num {
+      width: 54px; height: 54px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: rgba(231, 90, 8, 0.08);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 19px; font-weight: 760;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(231, 90, 8, 0.08);
+    }
+    .upg-row {
+      display: grid; grid-template-columns: 1fr;
+      align-items: stretch; gap: 10px;
+    }
+    .upg-before {
+      min-height: 70px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 21px; line-height: 1.32; color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-color: rgba(0,0,0,0.15);
+      padding: 17px 18px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      background: rgba(248, 249, 251, 0.92);
+      border-radius: 14px;
+    }
+    .upg-before svg { flex-shrink: 0; }
+    .upg-divider {
+      width: 100%; height: 34px;
+      background: transparent;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .upg-divider::after {
+      content: '→';
+      position: static;
+      width: 42px; height: 30px;
+      display: grid; place-items: center;
+      background: rgba(231, 90, 8, 0.08);
+      border: 1px solid rgba(231, 90, 8, 0.16);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 24px; font-weight: 760;
+    }
+    .upg-after {
+      min-height: 88px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 24px; font-weight: 740; line-height: 1.28;
+      color: var(--fg-strong);
+      padding: 19px 20px;
+      border: 1px solid rgba(231, 90, 8, 0.24);
+      background:
+        linear-gradient(135deg, rgba(255, 246, 241, 0.96), rgba(255, 255, 255, 0.92));
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8), 0 12px 26px rgba(231, 90, 8, 0.06);
+    }
+    .upg-after svg { flex-shrink: 0; }
+    .upg-mini {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-top: auto;
+      padding-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.2;
+    }
+    .upg-mini span {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 76px; height: 32px;
+      padding: 0 12px;
+      border: 1px solid rgba(15, 23, 42, 0.09);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.76);
+      font-weight: 620;
+      color: var(--fg);
+    }
+    .upg-mini i {
+      width: 16px; height: 1px; background: rgba(231, 90, 8, 0.32);
+      display: inline-block;
+    }
+    /* Stat card */
+    .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+    .stat-card {
+      border: 1px solid var(--border-strong);
+      padding: 36px 32px;
+      position: relative;
+      background: var(--surface);
+    }
+    .stat-card .stat-label {
+      font-family: var(--font-mono);
+      font-size: 12px; letter-spacing: 0.14em;
+      color: var(--muted); text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .stat-card .stat-num {
+      font-family: var(--font-display);
+      font-size: 76px; font-weight: 720;
+      color: var(--fg-strong);
+      letter-spacing: -0.025em; line-height: 1;
+      margin-bottom: 16px;
+    }
+    .stat-card .stat-num .accent { color: var(--accent); }
+    .stat-card .stat-unit {
+      font-size: 32px; color: var(--muted);
+      font-weight: 400;
+      margin-left: 4px;
+    }
+    .stat-card .stat-desc {
+      font-size: 17px; line-height: 1.45; color: var(--muted);
+      margin-top: 8px;
+    }
+    .stat-card .stat-arrow {
+      position: absolute; top: 32px; right: 32px;
+      color: var(--accent); font-size: 18px;
+    }
+
+    /* Module card grid (4-5 cards) */
+    .module-grid {
+      display: grid; gap: 24px;
+    }
+    .module-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .module-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .module-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+    .module-card {
+      border: 1px solid var(--border-strong);
+      padding: 32px 28px;
+      background: var(--surface);
+      display: flex; flex-direction: column; gap: 16px;
+      position: relative;
+      min-height: 280px;
+    }
+    .module-card .mod-num {
+      font-family: var(--font-mono);
+      font-size: 12px; letter-spacing: 0.18em;
+      color: var(--accent); text-transform: uppercase;
+    }
+    .module-card .mod-name {
+      font-size: 25px; font-weight: 680;
+      color: var(--fg-strong);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .module-card .mod-name .en {
+      display: block; font-size: 15px; font-weight: 500;
+      color: var(--muted); margin-top: 4px;
+      letter-spacing: 0.08em;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+    .module-card .mod-desc {
+      font-size: 18px; line-height: 1.48;
+      color: var(--muted);
+      flex: 1;
+    }
+    .module-card .mod-arrow {
+      color: var(--accent); font-size: 16px;
+    }
+    .s-modules .module-grid {
+      gap: 20px;
+    }
+    .s-modules .module-grid[style*="margin-bottom"] {
+      margin-bottom: 20px !important;
+    }
+    .s-modules .module-card {
+      min-height: 268px;
+      padding: 28px 24px;
+      gap: 14px;
+    }
+    .s-modules .module-card .mod-name {
+      font-size: 24px;
+      line-height: 1.16;
+    }
+    .s-modules .module-card .mod-name .en {
+      font-size: 13px;
+      margin-top: 6px;
+    }
+    .s-modules .module-card .mod-desc {
+      font-size: 16px;
+      line-height: 1.42;
+    }
+
+    /* Comparison table */
+    table.compare {
+      width: 100%; border-collapse: collapse;
+      font-size: 18px; line-height: 1.42;
+    }
+    table.compare th, table.compare td {
+      text-align: left; padding: 22px 24px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    table.compare th {
+      font-family: var(--font-mono);
+      font-size: 12px; letter-spacing: 0.14em;
+      color: var(--muted); text-transform: uppercase;
+      font-weight: 500;
+      padding-bottom: 18px;
+    }
+    table.compare td.name {
+      font-weight: 600; color: var(--fg-strong); width: 220px;
+    }
+    table.compare td.dinq { color: var(--accent); font-weight: 500; }
+    table.compare tr.row-dinq td {
+      background: rgba(231, 90, 8, 0.06);
+    }
+    table.compare tr.row-dinq td.name { color: var(--accent); }
+    .brand-lockup {
+      display: flex; align-items: center; gap: 12px;
+      min-width: 0;
+    }
+    .brand-lockup img {
+      width: 30px; height: 30px;
+      object-fit: contain;
+      flex-shrink: 0;
+      display: block;
+    }
+    .brand-lockup img.logo-wide {
+      width: 92px; height: 24px;
+    }
+    .brand-lockup .brand-text {
+      display: flex; flex-direction: column; gap: 2px;
+      min-width: 0;
+    }
+    .brand-lockup .brand-text strong {
+      font-size: 18px; line-height: 1.15;
+      color: inherit;
+    }
+    .brand-lockup .brand-text span {
+      font-size: 12px; line-height: 1.2;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .brand-lockup .logo-ats {
+      width: 38px; height: 30px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-family: var(--font-mono);
+      font-size: 11px; letter-spacing: 0.08em;
+      color: var(--fg-strong);
+      background: rgba(255,255,255,0.74);
+      flex-shrink: 0;
+    }
+    .brand-lockup .logo-dinq {
+      width: 30px; height: 30px;
+      object-fit: contain;
+      border-radius: 0;
+      display: block;
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    /* Benchmark result matrix */
+    .bench-wrap {
+      display: flex; flex-direction: column; gap: 22px;
+    }
+    .bench-kpis {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+    }
+    .bench-kpi {
+      padding: 20px 20px 18px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 14px 34px rgba(10, 14, 26, 0.045);
+    }
+    .bench-kpi .k-tag {
+      font-family: var(--font-mono);
+      font-size: 11px; letter-spacing: 0.14em;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .bench-kpi .k-name {
+      font-size: 23px; font-weight: 700; color: var(--fg-strong);
+      line-height: 1.22;
+      margin-bottom: 12px;
+    }
+    .bench-kpi .k-bar {
+      height: 6px; border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), rgba(231, 90, 8, 0.18));
+    }
+    .bench-grid {
+      display: grid; grid-template-columns: 1fr 360px; gap: 22px;
+      align-items: stretch;
+    }
+    .bench-table {
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 18px 42px rgba(10, 14, 26, 0.05);
+    }
+    .bench-row {
+      display: grid; grid-template-columns: 190px 1.02fr 1fr;
+      border-bottom: 1px solid var(--border);
+      min-height: 84px;
+    }
+    .bench-row:last-child { border-bottom: 0; }
+    .bench-row.head {
+      min-height: 44px;
+      background: rgba(248, 249, 251, 0.92);
+      font-family: var(--font-mono);
+      font-size: 11px; letter-spacing: 0.12em;
+      color: var(--muted); text-transform: uppercase;
+    }
+    .bench-cell {
+      padding: 12px 16px;
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; justify-content: center;
+      font-size: 15px; line-height: 1.38; color: var(--muted);
+    }
+    .bench-cell:last-child { border-right: 0; }
+    .bench-cell strong {
+      font-size: 18px; line-height: 1.22;
+      color: var(--fg-strong); margin-bottom: 5px;
+      font-weight: 720;
+    }
+    .bench-cell.accent strong { color: var(--accent); }
+    .bench-side {
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .bench-note {
+      flex: 1;
+      padding: 22px;
+      border: 1px solid rgba(231, 90, 8, 0.20);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,246,241,0.92), rgba(255,255,255,0.86));
+      box-shadow: 0 18px 42px rgba(231, 90, 8, 0.055);
+    }
+    .bench-note .note-num {
+      font-family: var(--font-display);
+      font-size: 46px; font-weight: 760; letter-spacing: -0.02em;
+      color: var(--accent); line-height: 1;
+      margin-bottom: 10px;
+    }
+    .bench-note .note-title {
+      font-size: 23px; font-weight: 720; color: var(--fg-strong);
+      line-height: 1.22; margin-bottom: 10px;
+    }
+    .bench-note .note-text {
+      font-size: 15px; line-height: 1.48; color: var(--muted);
+    }
+    .bench-flow {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 18px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 14px 34px rgba(10, 14, 26, 0.045);
+    }
+    .bench-flow .flow-label {
+      font-family: var(--font-mono);
+      font-size: 11px; letter-spacing: 0.14em;
+      color: var(--accent); text-transform: uppercase;
+      margin-right: 6px;
+    }
+    .bench-flow .flow-chip {
+      padding: 9px 13px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      font-size: 14px; font-weight: 650; color: var(--fg-strong);
+      white-space: nowrap;
+    }
+    .bench-flow .flow-arrow {
+      color: var(--accent); font-size: 16px; font-weight: 800;
+    }
+
+    .s-benchmark {
+      padding-bottom: 64px;
+    }
+    .s-benchmark .slide-head {
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+    }
+    .s-benchmark h1.slide-title {
+      font-size: 60px;
+      line-height: 1.04;
+    }
+    .s-benchmark h2.slide-subtitle {
+      font-size: 23px;
+      line-height: 1.36;
+      margin-top: 16px;
+      max-width: 1180px;
+    }
+    .s-benchmark .bench-wrap {
+      gap: 9px;
+    }
+    .s-benchmark .bench-section-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .s-benchmark .bench-kpis {
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .s-benchmark .bench-kpi {
+      padding: 14px 18px 12px;
+      border-radius: 14px;
+    }
+    .s-benchmark .bench-kpi .k-tag {
+      margin-bottom: 6px;
+    }
+    .s-benchmark .bench-kpi .k-name {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .s-benchmark .bench-kpi .k-bar {
+      height: 4px;
+    }
+    .s-benchmark .bench-grid {
+      gap: 16px;
+      grid-template-columns: 1fr 330px;
+    }
+    .s-benchmark .bench-row {
+      min-height: 62px;
+      grid-template-columns: 178px 1.02fr 1fr;
+    }
+    .s-benchmark .bench-row.head {
+      min-height: 34px;
+    }
+    .s-benchmark .bench-cell {
+      padding: 9px 14px;
+      font-size: 14px;
+      line-height: 1.3;
+    }
+    .s-benchmark .bench-cell strong {
+      font-size: 16px;
+      margin-bottom: 3px;
+    }
+    .s-benchmark .bench-side {
+      gap: 12px;
+    }
+    .s-benchmark .bench-note {
+      padding: 14px;
+      border-radius: 16px;
+    }
+    .s-benchmark .bench-note .note-num {
+      font-size: 38px;
+      margin-bottom: 7px;
+    }
+    .s-benchmark .bench-note .note-title {
+      font-size: 20px;
+      margin-bottom: 7px;
+    }
+    .s-benchmark .bench-note .note-text {
+      font-size: 14px;
+      line-height: 1.34;
+    }
+    .s-benchmark .bench-flow {
+      padding: 8px 12px;
+      border-radius: 14px;
+      gap: 7px;
+    }
+    .s-benchmark .bench-flow .flow-label {
+      font-size: 10px;
+      margin-right: 2px;
+    }
+    .s-benchmark .bench-flow .flow-chip {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .s-benchmark .bench-flow .flow-arrow {
+      font-size: 14px;
+    }
+    .s-benchmark .bench-flow {
+      padding: 11px 14px;
+      border-radius: 14px;
+    }
+    .s-benchmark .bench-flow .flow-chip {
+      padding: 7px 11px;
+      font-size: 14px;
+    }
+
+    .s-usecases {
+      padding-bottom: 56px;
+    }
+    .s-usecases .slide-head {
+      margin-bottom: 34px;
+      padding-bottom: 26px;
+    }
+    .s-usecases h1.slide-title {
+      font-size: 58px;
+      line-height: 1.02;
+      max-width: 1180px;
+    }
+    .s-usecases .col-2 {
+      gap: 54px !important;
+    }
+    .s-usecases ul.bullets {
+      gap: 8px !important;
+    }
+    .s-usecases ul.bullets li {
+      padding-bottom: 16px;
+      font-size: 20px;
+      line-height: 1.34;
+    }
+    .s-usecases ul.bullets li .num {
+      padding-top: 5px;
+    }
+    .s-usecases ul.bullets li .txt strong {
+      font-size: 21px;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .s-usecases ul.bullets li .txt span {
+      font-size: 17px;
+      line-height: 1.42;
+    }
+
+    .s-crossindustry {
+      padding-bottom: 58px;
+    }
+    .s-crossindustry .slide-head {
+      margin-bottom: 40px;
+      padding-bottom: 26px;
+    }
+    .s-crossindustry h1.slide-title {
+      font-size: 60px;
+      line-height: 1.03;
+      max-width: 1080px;
+    }
+    .s-crossindustry h2.slide-subtitle {
+      font-size: 21px;
+      line-height: 1.36;
+      margin-top: 16px;
+      max-width: 1100px;
+    }
+    .s-crossindustry .col-2-5-7 {
+      gap: 70px;
+    }
+    .s-crossindustry .lead {
+      font-size: 19px !important;
+      line-height: 1.48 !important;
+    }
+    .s-crossindustry ul.bullets {
+      gap: 8px !important;
+    }
+    .s-crossindustry ul.bullets li {
+      padding-bottom: 18px;
+      font-size: 20px;
+      line-height: 1.3;
+    }
+    .s-crossindustry ul.bullets li .txt strong {
+      font-size: 22px;
+      line-height: 1.18;
+      margin-bottom: 4px;
+    }
+    .s-crossindustry ul.bullets li .txt span {
+      font-size: 18px;
+      line-height: 1.34;
+    }
+    .s-crossindustry .slide-foot {
+      padding-top: 20px;
+    }
+
+    .s-outreach {
+      padding-bottom: 68px;
+    }
+    .s-outreach .slide-head {
+      margin-bottom: 26px;
+      padding-bottom: 20px;
+    }
+    .s-outreach h1.slide-title {
+      font-size: 56px;
+      line-height: 1.04;
+    }
+    .s-outreach h2.slide-subtitle {
+      font-size: 20px;
+      line-height: 1.36;
+      margin-top: 14px;
+      max-width: 1100px;
+    }
+    .s-outreach .body {
+      transform: translateY(-12px) scale(0.94);
+      transform-origin: top center;
+    }
+    .s-outreach .slide-foot {
+      padding-top: 18px;
+    }
+
+    /* TOC layout */
+    .toc-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 72px;
+    }
+    .toc-col { display: flex; flex-direction: column; gap: 26px; }
+    .toc-item {
+      display: grid; grid-template-columns: 80px 1fr;
+      gap: 24px; padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .toc-item:last-child { border-bottom: 0; }
+    .toc-item .toc-num {
+      font-family: var(--font-mono);
+      font-size: 15px; letter-spacing: 0.1em;
+      color: var(--accent); font-weight: 500;
+      padding-top: 6px;
+    }
+    .toc-item .toc-name {
+      font-size: 28px; font-weight: 700;
+      color: var(--fg-strong);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .toc-item .toc-sub {
+      font-size: 17px; color: var(--muted);
+      margin-top: 9px; line-height: 1.48;
+      max-width: 560px;
+    }
+    .s-toc {
+      padding-bottom: 58px;
+    }
+    .s-toc .slide-head {
+      margin-bottom: 38px;
+      padding-bottom: 24px;
+    }
+    .s-toc h1.slide-title {
+      font-size: 62px;
+      line-height: 1.04;
+    }
+    .s-toc .toc-grid {
+      gap: 68px;
+    }
+    .s-toc .toc-col {
+      gap: 20px;
+    }
+    .s-toc .toc-item {
+      padding-bottom: 18px;
+    }
+    .s-toc .toc-item .toc-name {
+      font-size: 28px;
+      line-height: 1.16;
+    }
+    .s-toc .toc-item .toc-sub {
+      font-size: 18px;
+      line-height: 1.4;
+      margin-top: 7px;
+    }
+    .s-toc .slide-foot {
+      padding-top: 20px;
+    }
+
+    /* Readability pass: keep product and dense slides legible at deck scale */
+    .s-profile,
+    .s-api,
+    .s-integration,
+    .s-validation,
+    .s-team {
+      padding-bottom: 64px;
+    }
+    .s-profile h2.slide-subtitle,
+    .s-api h2.slide-subtitle,
+    .s-integration h2.slide-subtitle,
+    .s-validation h2.slide-subtitle,
+    .s-team h2.slide-subtitle {
+      font-size: 23px;
+      line-height: 1.38;
+      max-width: 1180px;
+    }
+    .s-profile .body,
+    .s-api .body,
+    .s-integration .body {
+      gap: 34px !important;
+      padding-top: 4px !important;
+    }
+    .s-profile .slide-head,
+    .s-api .slide-head,
+    .s-integration .slide-head {
+      margin-bottom: 38px;
+    }
+    .s-profile [style*="font-size:15px"],
+    .s-api [style*="font-size:15px"],
+    .s-integration [style*="font-size:15px"],
+    .s-outreach [style*="font-size:13px"],
+    .s-validation [style*="font-size:14px"] {
+      font-size: 17px !important;
+      line-height: 1.44 !important;
+    }
+    .s-profile [style*="font-size:21px"],
+    .s-api [style*="font-size:22px"],
+    .s-integration [style*="font-size:22px"],
+    .s-outreach [style*="font-size:18px"] {
+      font-size: 23px !important;
+      line-height: 1.18 !important;
+    }
+    .s-profile [style*="padding:14px 16px"],
+    .s-api [style*="padding:16px 18px"],
+    .s-integration [style*="padding:16px 18px"] {
+      padding: 18px 20px !important;
+    }
+    .s-outreach [style*="font-size:20px"] {
+      font-size: 24px !important;
+      line-height: 1.18 !important;
+    }
+    .s-outreach [style*="font-size:15px"] {
+      font-size: 17px !important;
+    }
+    .s-validation .body {
+      padding-top: 8px;
+    }
+    .s-validation .endorse-logo-grid {
+      gap: 20px;
+    }
+    .s-validation .endorse-logo {
+      min-height: 96px;
+    }
+    .s-team .team-bio {
+      font-size: 18px;
+      line-height: 1.5;
+    }
+    .s-team .team-role {
+      font-size: 18px;
+    }
+    .s-team .slide-head {
+      margin-bottom: 42px;
+    }
+    .s-shortlist {
+      padding-bottom: 64px;
+    }
+    .s-shortlist .slide-head {
+      margin-bottom: 42px;
+    }
+    .s-shortlist h2.slide-subtitle {
+      font-size: 23px;
+      line-height: 1.38;
+      max-width: 1180px;
+    }
+    .s-shortlist .shortlist-lens {
+      transform: scale(0.94);
+      transform-origin: center;
+    }
+
+    /* Pain point grid */
+    .pain-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+    .pain-card {
+      border: 1px solid var(--border-strong);
+      padding: 28px 28px;
+      background: var(--surface);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .pain-card .pain-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px; letter-spacing: 0.16em;
+      color: var(--accent); text-transform: uppercase;
+      align-self: flex-start;
+    }
+    .pain-card .pain-tag::before {
+      content: ''; width: 8px; height: 8px;
+      background: var(--accent); border-radius: 1px;
+    }
+    .pain-card .pain-name {
+      font-size: 30px; font-weight: 680;
+      color: var(--fg-strong);
+      letter-spacing: -0.015em;
+    }
+    .pain-card .pain-desc {
+      font-size: 20px; line-height: 1.42;
+      color: var(--muted);
+    }
+
+    /* Quote block */
+    .quote {
+      border-left: 2px solid var(--accent);
+      padding-left: 32px;
+      font-size: 25px; line-height: 1.45;
+      color: var(--fg);
+      max-width: 1100px;
+      margin-top: 32px;
+    }
+    .quote .accent { color: var(--accent); font-weight: 500; }
+
+    /* Footer for content slides */
+    .slide-foot {
+      margin-top: auto;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--font-mono);
+      font-size: 13px; letter-spacing: 0.18em;
+      color: var(--muted-soft);
+      text-transform: uppercase;
+    }
+    .slide-foot .brand {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .slide-foot .brand .dot {
+      width: 6px; height: 6px; background: var(--accent); border-radius: 1px;
+    }
+
+    /* Team cards */
+    .team-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .team-card {
+      border: 1px solid var(--border-strong);
+      padding: 36px 32px;
+      background: var(--surface);
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .team-card .team-name {
+      font-size: 27px; font-weight: 680;
+      color: var(--fg-strong);
+      letter-spacing: -0.015em;
+    }
+    .team-card .team-name .en {
+      display: block; font-size: 16px; color: var(--muted);
+      font-weight: 500; margin-top: 4px;
+      letter-spacing: 0.04em;
+      font-family: var(--font-mono);
+    }
+    .team-card .team-role {
+      font-family: var(--font-mono);
+      font-size: 12px; letter-spacing: 0.14em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .team-card .team-bio {
+      font-size: 18px; line-height: 1.48;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    /* Logo wall */
+    .logo-wall {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+    .logo-cell {
+      padding: 36px 24px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 8px;
+      min-height: 130px;
+      justify-content: center;
+    }
+    .logo-cell:nth-child(4n) { border-right: 0; }
+    .logo-cell .lg-name {
+      font-size: 18px; font-weight: 600;
+      color: var(--fg-strong);
+    }
+    .logo-cell .lg-tag {
+      font-family: var(--font-mono);
+      font-size: 11px; letter-spacing: 0.16em;
+      color: var(--muted-soft);
+      text-transform: uppercase;
+    }
+
+    /* Logo category groups */
+    .logo-cat {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .logo-cat-head {
+      font-family: var(--font-mono);
+      font-size: 15px; letter-spacing: 0.16em;
+      color: var(--accent);
+      text-transform: uppercase;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-strong);
+    }
+    .logo-cat-list {
+      font-size: 18px; line-height: 1.7;
+      color: var(--fg);
+    }
+    .adopter-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+    .adopter-card {
+      min-height: 330px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.58);
+      padding: 28px 22px 24px;
+      display: flex; flex-direction: column; gap: 22px;
+      box-shadow: 0 18px 42px rgba(10, 14, 26, 0.04);
+    }
+    .adopter-list {
+      font-size: 19px; line-height: 1.48;
+      color: var(--muted);
+      min-height: 78px;
+    }
+    .adopter-logos {
+      margin-top: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+      gap: 14px 18px;
+    }
+    .adopter-logos.three-up {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .logo-tile {
+      width: 100%;
+      min-width: 0;
+      height: 58px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0;
+      overflow: hidden;
+    }
+    .logo-tile img {
+      max-width: 128px; max-height: 48px;
+      width: auto; height: auto;
+      object-fit: contain;
+      display: block;
+      flex: 0 1 auto;
+    }
+    .logo-tile.logo-tall img { max-height: 62px; }
+    .logo-tile.logo-wide img { max-width: 146px; max-height: 44px; }
+    .logo-tile.logo-small img { max-width: 74px; max-height: 44px; }
+    .logo-tile.logo-text img { max-width: 118px; max-height: 38px; }
+    .adopter-logos.three-up .logo-tile img { max-width: 96px; max-height: 42px; }
+    .adopter-logos.three-up .logo-tile.logo-wide img { max-width: 106px; max-height: 40px; }
+
+    .s-adopters h2.slide-subtitle,
+    .s-sources h2.slide-subtitle,
+    .s-freshness h2.slide-subtitle,
+    .s-competition h2.slide-subtitle {
+      font-size: 24px;
+      line-height: 1.38;
+      max-width: 1200px;
+    }
+    .s-adopters .slide-head,
+    .s-sources .slide-head,
+    .s-freshness .slide-head,
+    .s-competition .slide-head {
+      margin-bottom: 42px;
+    }
+    .s-adopters .logo-cat-head {
+      font-size: 17px;
+      padding-bottom: 18px;
+    }
+    .s-adopters .adopter-card {
+      min-height: 350px;
+      padding: 30px 24px 26px;
+    }
+    .s-adopters .body > div[style*="font-size: 11px"] {
+      font-size: 13px !important;
+      line-height: 1.45 !important;
+      letter-spacing: 0.1em !important;
+    }
+    .s-sources .source-grid {
+      gap: 34px 64px;
+    }
+    .s-sources .source-item {
+      gap: 12px;
+      padding-bottom: 28px;
+    }
+    .s-sources .source-item .src-name {
+      font-size: 27px;
+      line-height: 1.18;
+    }
+    .s-sources .source-item .src-desc {
+      font-size: 20px;
+      line-height: 1.42;
+    }
+    .s-freshness ul.bullets li .txt span {
+      font-size: 19px;
+      line-height: 1.38;
+    }
+    .s-competition table.compare {
+      font-size: 20px;
+      line-height: 1.34;
+    }
+    .s-competition table.compare th {
+      font-size: 14px;
+    }
+    .s-competition table.compare th,
+    .s-competition table.compare td {
+      padding: 20px 22px;
+    }
+    .s-competition .brand-lockup .brand-text strong {
+      font-size: 20px;
+    }
+    .s-competition .brand-lockup .brand-text span {
+      font-size: 13px;
+    }
+    .endorse-logo-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .endorse-logo {
+      height: 76px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.82);
+      display: flex; align-items: center; justify-content: center;
+      padding: 14px;
+    }
+    .endorse-logo img {
+      max-width: 100%; max-height: 42px;
+      width: auto; height: auto; object-fit: contain; display: block;
+    }
+    .team-logo-row {
+      margin-top: auto;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .team-logo-chip {
+      height: 54px; min-width: 76px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      padding: 6px 8px;
+    }
+    .team-logo-chip img {
+      max-width: 154px; max-height: 38px;
+      width: auto; height: auto; object-fit: contain; display: block;
+    }
+    .team-logo-chip.icon img { max-width: 42px; max-height: 42px; }
+    .team-logo-chip.damo img { max-width: 116px; max-height: 50px; }
+    .team-logo-chip.text {
+      font-size: 14px; font-weight: 720; color: var(--fg-strong);
+    }
+
+    /* Data source list */
+    .source-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px 56px;
+    }
+    .source-item {
+      display: flex; flex-direction: column; gap: 10px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .source-item .src-tag {
+      font-family: var(--font-mono);
+      font-size: 12px; letter-spacing: 0.16em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .source-item .src-name {
+      font-size: 23px; font-weight: 680;
+      color: var(--fg-strong);
+    }
+    .source-item .src-desc {
+      font-size: 19px; line-height: 1.44;
+      color: var(--muted);
+    }
+    .source-vendor-layout {
+      display: grid;
+      grid-template-columns: 1.65fr 0.9fr;
+      gap: 34px;
+      align-items: stretch;
+    }
+    .source-panel {
+      border: 1px solid var(--border-strong);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 18px 48px rgba(10, 14, 26, 0.055);
+      overflow: hidden;
+    }
+    .source-panel-head {
+      padding: 22px 28px;
+      border-bottom: 1px solid var(--border-strong);
+      font-size: 26px;
+      font-weight: 760;
+      color: var(--fg-strong);
+      letter-spacing: -0.01em;
+    }
+    .source-panel-body {
+      padding: 28px;
+    }
+    .source-intro {
+      font-size: 22px;
+      line-height: 1.42;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+    .source-intro strong {
+      color: var(--fg-strong);
+      font-weight: 760;
+    }
+    .source-logo-wall {
+      border-top: 1px dashed rgba(231, 90, 8, 0.38);
+      padding-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 18px 22px;
+      align-items: center;
+    }
+    .source-logo-cell {
+      min-height: 66px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 6px;
+    }
+    .source-logo-cell img {
+      max-width: 152px;
+      max-height: 54px;
+      object-fit: contain;
+      display: block;
+    }
+    .source-logo-cell.logo-wide img {
+      max-width: 172px;
+      max-height: 46px;
+    }
+    .source-logo-cell.logo-mark img {
+      max-width: 88px;
+      max-height: 58px;
+    }
+    .source-logo-cell.logo-medium img {
+      max-width: 138px;
+      max-height: 56px;
+    }
+    .source-logo-cell.text-only {
+      font-size: 17px;
+      font-weight: 760;
+      color: var(--fg-strong);
+      text-align: center;
+      line-height: 1.2;
+    }
+    .coverage-panel {
+      border-color: rgba(231, 90, 8, 0.30);
+      background: linear-gradient(135deg, rgba(255, 246, 241, 0.78), rgba(255, 255, 255, 0.86));
+    }
+    .coverage-panel .source-panel-head {
+      color: var(--accent);
+      border-bottom-color: rgba(231, 90, 8, 0.24);
+    }
+    .coverage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .coverage-item {
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(231, 90, 8, 0.18);
+    }
+    .coverage-item:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+    .coverage-item .label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .coverage-item strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.18;
+      color: var(--fg-strong);
+      margin-bottom: 7px;
+    }
+    .coverage-item span {
+      display: block;
+      font-size: 18px;
+      line-height: 1.42;
+      color: var(--muted);
+    }
+    .s-sources {
+      padding-bottom: 68px;
+    }
+    .s-sources .slide-head {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+    }
+    .s-sources .source-vendor-layout {
+      gap: 24px;
+    }
+    .s-sources .source-panel-head {
+      padding: 15px 22px;
+      font-size: 22px;
+    }
+    .s-sources .source-panel-body {
+      padding: 18px 22px;
+    }
+    .s-sources .source-intro {
+      font-size: 18px;
+      line-height: 1.34;
+      margin-bottom: 14px;
+    }
+    .s-sources .source-logo-wall {
+      padding-top: 14px;
+      gap: 8px 14px;
+    }
+    .s-sources .source-logo-cell {
+      min-height: 44px;
+      padding: 2px 4px;
+    }
+    .s-sources .source-logo-cell img {
+      max-width: 126px;
+      max-height: 38px;
+    }
+    .s-sources .source-logo-cell.logo-wide img {
+      max-width: 140px;
+      max-height: 34px;
+    }
+    .s-sources .source-logo-cell.logo-mark img {
+      max-width: 62px;
+      max-height: 40px;
+    }
+    .s-sources .source-logo-cell.logo-medium img {
+      max-width: 110px;
+      max-height: 38px;
+    }
+    .s-sources .coverage-list {
+      gap: 10px;
+    }
+    .s-sources .coverage-item {
+      padding-bottom: 10px;
+    }
+    .s-sources .coverage-item .label {
+      font-size: 10px;
+      margin-bottom: 5px;
+    }
+    .s-sources .coverage-item strong {
+      font-size: 18px;
+      line-height: 1.12;
+      margin-bottom: 5px;
+    }
+    .s-sources .coverage-item span {
+      font-size: 14px;
+      line-height: 1.28;
+    }
+
+    .shortlist-lens {
+      position: absolute;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 360px;
+      padding: 18px 26px 18px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 26px 24px, rgba(255,255,255,0.96), rgba(255,255,255,0.76) 48%, rgba(255,255,255,0.58)),
+        rgba(255, 255, 255, 0.68);
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      box-shadow:
+        0 28px 70px rgba(10, 14, 26, 0.18),
+        0 0 0 1px rgba(231, 90, 8, 0.10),
+        inset 0 1px 0 rgba(255,255,255,0.88);
+    }
+    .shortlist-lens::before {
+      content: '';
+      width: 54px;
+      height: 54px;
+      border: 4px solid var(--accent);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95) 0 18%, rgba(231,90,8,0.10) 19% 100%);
+      box-shadow:
+        0 0 0 8px rgba(231,90,8,0.09),
+        0 10px 26px rgba(231,90,8,0.20);
+      flex: 0 0 auto;
+    }
+    .shortlist-lens::after {
+      content: '';
+      position: absolute;
+      left: 63px;
+      top: 58px;
+      width: 30px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      transform: rotate(45deg);
+      box-shadow: 0 8px 18px rgba(231,90,8,0.24);
+    }
+    .shortlist-lens .lens-text {
+      font-size: 24px;
+      font-weight: 740;
+      line-height: 1.18;
+      color: var(--fg-strong);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .shortlist-lens.lens-left { left: 38px; top: 32px; }
+    .shortlist-lens.lens-top { right: 356px; top: 30px; min-width: 390px; }
+    .shortlist-lens.lens-bottom { right: 74px; bottom: 40px; min-width: 360px; }
+
+    /* Closing slide */
+    .s-closing { padding: 0; background: var(--surface-2); }
+    .s-closing .closing-inner {
+      flex: 1; padding: 100px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .s-closing .closing-main {
+      display: flex; flex-direction: column; gap: 42px;
+    }
+    .s-closing h1.closing-title {
+      font-family: var(--font-display);
+      font-size: 116px; font-weight: 720;
+      line-height: 1.0; letter-spacing: -0.04em;
+      color: var(--fg-strong);
+      max-width: 1500px;
+    }
+    .s-closing h1.closing-title .accent { color: var(--accent); }
+    .s-closing .closing-sub {
+      font-size: 33px; line-height: 1.38; color: var(--muted);
+      max-width: 860px;
+    }
+    .s-closing .closing-values {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 32px; margin-top: 18px;
+    }
+    .s-closing .value-card {
+      border-top: 1px solid var(--accent);
+      padding-top: 24px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .s-closing .value-card .vc-tag {
+      font-family: var(--font-mono);
+      font-size: 13px; letter-spacing: 0.2em;
+      color: var(--accent); text-transform: uppercase;
+    }
+    .s-closing .value-card .vc-name {
+      font-size: 28px; font-weight: 600;
+      color: var(--fg-strong);
+    }
+    .s-closing .value-card .vc-desc {
+      font-size: 19px; line-height: 1.42; color: var(--muted);
+    }
+    .s-closing .closing-url {
+      margin-top: 10px;
+      width: fit-content;
+      min-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 36px;
+      padding: 30px 38px;
+      border: 1px solid rgba(231, 90, 8, 0.28);
+      background: rgba(231, 90, 8, 0.08);
+      box-shadow: 0 22px 56px rgba(231, 90, 8, 0.12);
+      color: var(--fg-strong);
+      text-decoration: none;
+    }
+    .s-closing .closing-url .url-label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      color: var(--accent);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .s-closing .closing-url .url-text {
+      font-family: var(--font-display);
+      font-size: 62px;
+      line-height: 1;
+      font-weight: 720;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="deck-shell">
+    <div class="deck-stage" id="deck-stage">
+
+<!-- ===== Slide 01 · Cover ===== -->
+      <section class="slide active s-cover grid-bg" data-screen-label="01 Title">
+        <span class="corner-dot tl"></span>
+        <span class="corner-dot tr"></span>
+        <span class="corner-dot bl"></span>
+        <span class="corner-dot br"></span>
+        <div class="cover-inner">
+          <div class="cover-top">
+            <div class="cover-logo">DINQ<span class="dot">.</span></div>
+            <div>2026 · Product Introduction</div>
+          </div>
+          <div class="cover-main">
+            <div class="cover-eyebrow">AI-Native Talent Intelligence</div>
+            <h1 class="cover-title">Talent discovery<br><span class="accent">for the AI age</span></h1>
+          </div>
+          <div class="cover-foot">
+            <div class="cover-tagline">From one-off sourcing to an AI-native talent workflow</div>
+            <div class="cover-meta">
+              v2026.01<br>
+              English Version
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 02 · Contents ===== -->
+      <section class="slide s-content s-toc grid-bg" data-screen-label="02 Contents">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">How DINQ Changes Talent Discovery</div>
+            <h1 class="slide-title">From one-off sourcing<br>to an AI-native talent workflow</h1>
+          </div>
+          <div class="right">DINQ · 2026</div>
+        </div>
+        <div class="body">
+          <div class="toc-grid">
+            <div class="toc-col">
+              <div class="toc-item">
+                <div class="toc-num">01</div>
+                <div>
+                  <div class="toc-name">The Sourcing Shift</div>
+                  <div class="toc-sub">The failure of resumes, keywords, and single-platform searches.</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">02</div>
+                <div>
+                  <div class="toc-name">Adoption across industries</div>
+                  <div class="toc-sub">How AI labs, enterprises, and investors leverage DINQ today.</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">03</div>
+                <div>
+                  <div class="toc-name">Beyond Resume Data</div>
+                  <div class="toc-sub">Mapping public signals across code, papers, models, and the open web.</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">04</div>
+                <div>
+                  <div class="toc-name">Talent Graph Infrastructure</div>
+                  <div class="toc-sub">Identity resolution and cross-platform candidate mapping.</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">05</div>
+                <div>
+                  <div class="toc-name">Product Workflow</div>
+                  <div class="toc-sub">From natural-language discovery to automated shortlists and outreach.</div>
+                </div>
+              </div>
+            </div>
+            <div class="toc-col">
+              <div class="toc-item">
+                <div class="toc-num">06</div>
+                <div>
+                  <div class="toc-name">Trust &amp; Traceability</div>
+                  <div class="toc-sub">Source-level evidence, data freshness, and provenance tracking.</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">07</div>
+                <div>
+                  <div class="toc-name">Benchmark Results</div>
+                  <div class="toc-sub">Complex requirements expose the performance gap.</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">08</div>
+                <div>
+                  <div class="toc-name">Validation Signals</div>
+                  <div class="toc-sub">Ecosystem support, media distribution, and executive backgrounds.</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">09</div>
+                <div>
+                  <div class="toc-name">Business Applications</div>
+                  <div class="toc-sub">Target use cases across recruiting, expert mapping, and intelligence.</div>
+                </div>
+              </div>
+              <div class="toc-item">
+                <div class="toc-num">10</div>
+                <div>
+                  <div class="toc-name">Operating Layer</div>
+                  <div class="toc-sub">Building a sustainable, reusable talent operating system.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>02 · CONTENTS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 03 · Industry Challenge ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="03 Industry Challenge">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">01 · The Sourcing Shift</div>
+            <h1 class="slide-title">Talent Acquisition<br>Has become a technical advantage</h1>
+            <h2 class="slide-subtitle">In AI, research, and deep-tech markets, the teams that identify the right people first can move faster on models, products, and new technical opportunities.</h2>
+          </div>
+          <div class="right">3 KEY POINTS</div>
+        </div>
+        <div class="body">
+          <ul class="bullets">
+            <li>
+              <div class="num">01</div>
+              <div class="txt">
+                <strong>Technology cycles move faster than job taxonomies</strong>
+                <span>New roles, stacks, and research areas emerge before standard databases can classify them.</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">02</div>
+              <div class="txt">
+                <strong>The best candidates rarely appear in inbound funnels</strong>
+                <span>High-signal people are often visible through work, not resumes.</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">03</div>
+              <div class="txt">
+                <strong>One key hire can change the trajectory of a team</strong>
+                <span>Specialized talent can affect model quality, product speed, and strategic direction.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>03 · THE SOURCING SHIFT</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 04 · Talent Gap ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="04 Talent Gap">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">01 · The Sourcing Shift</div>
+            <h1 class="slide-title">The Talent-Skill Gap<br>Is getting wider</h1>
+          </div>
+          <div class="right">WEF · LINKEDIN</div>
+        </div>
+        <div class="body">
+          <div class="stat-row" style="margin-bottom: 48px;">
+            <div class="stat-card">
+              <div class="stat-arrow">↗</div>
+              <div class="stat-label">Business transformation</div>
+              <div class="stat-num"><span class="accent">86</span><span class="stat-unit">%</span></div>
+              <div class="stat-desc">of companies expect AI to significantly reshape their business by 2030</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-arrow">↗</div>
+              <div class="stat-label">Skill disruption</div>
+              <div class="stat-num"><span class="accent">39</span><span class="stat-unit">%</span></div>
+              <div class="stat-desc">of today’s workplace skills are expected to change between 2025 and 2030</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-arrow">↗</div>
+              <div class="stat-label">Talent skill gap</div>
+              <div class="stat-num"><span class="accent">63</span><span class="stat-unit">%</span></div>
+              <div class="stat-desc">of employers see skill gaps as a major barrier to transformation</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-arrow">↗</div>
+              <div class="stat-label">Hiring demand</div>
+              <div class="stat-num"><span class="accent">70</span><span class="stat-unit">%</span></div>
+              <div class="stat-desc">of employers plan to hire for emerging technical skills</div>
+            </div>
+          </div>
+          <div class="quote">Microsoft and LinkedIn’s 2024 Work Trend Index points to persistent shortages across engineering, cybersecurity, and creative roles. <span class="accent">Fast discovery and precise talent evaluation</span> are becoming foundational capabilities for digital and AI transformation.</div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>04 · THE SOURCING SHIFT</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 05 · Legacy Failure ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="05 Legacy Fails">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">01 · The Sourcing Shift</div>
+            <h1 class="slide-title">Resumes show claims<br>Modern talent search needs evidence</h1>
+            <h2 class="slide-subtitle">Traditional tools rely on self-reported profiles, schools, employers, and keywords. They struggle to evaluate real technical capability, especially when the right evidence lives across code, papers, projects, and the open web.</h2>
+          </div>
+          <div class="right">FOUR PAIN POINTS</div>
+        </div>
+        <div class="body">
+          <div class="pain-grid">
+            <div class="pain-card">
+              <div class="pain-tag">PAIN 01</div>
+              <div class="pain-name">Fragmented coverage</div>
+              <div class="pain-desc">Single-platform search misses high-signal work across GitHub, Hugging Face, academic sources, projects, and public web pages.</div>
+            </div>
+            <div class="pain-card">
+              <div class="pain-tag">PAIN 02</div>
+              <div class="pain-name">Weak proof of ability</div>
+              <div class="pain-desc">Keywords do not prove mastery. Teams need evidence of research depth, code contribution, product execution, and domain expertise.</div>
+            </div>
+            <div class="pain-card">
+              <div class="pain-tag">PAIN 03</div>
+              <div class="pain-name">Manual research bottlenecks</div>
+              <div class="pain-desc">Specialized searches require repeated scoping, multi-platform research, identity checks, evidence review, and contact discovery.</div>
+            </div>
+            <div class="pain-card">
+              <div class="pain-tag">PAIN 04</div>
+              <div class="pain-name">Siloed talent data</div>
+              <div class="pain-desc">Every search starts from zero without shared shortlists, standardized profiles, status tracking, or a long-term talent database.</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>05 · THE SOURCING SHIFT</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 06 · Early Adopters ===== -->
+      <section class="slide s-content s-adopters grid-bg" data-screen-label="06 Early Adopters">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">02 · Adoption across industries</div>
+            <h1 class="slide-title">Adoption across industries</h1>
+            <h2 class="slide-subtitle">AI labs, enterprises, investors, global teams, and specialist recruiting organizations use DINQ when conventional sourcing does not surface the right people fast enough.</h2>
+          </div>
+          <div class="right">EARLY USERS</div>
+        </div>
+        <div class="body">
+          <div class="adopter-grid">
+            <div class="adopter-card">
+              <div class="logo-cat-head">AI Research</div>
+              <div class="adopter-list">Zhipu AI · Synapse AI<br>EDGE Agentic Labs · KoreTech</div>
+              <div class="adopter-logos three-up">
+                <div class="logo-tile"><img src="../logos/logo-zhipu.png" alt="Zhipu AI logo"></div>
+                <div class="logo-tile"><img src="../logos/logo-edge.jpeg" alt="EDGE Agentic Labs logo"></div>
+                <div class="logo-tile logo-wide"><img src="../logos/logo-damo-header.svg" alt="KoreTech logo"></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">Enterprise</div>
+              <div class="adopter-list">Ant Group · ByteDance<br>Tencent · JD.com</div>
+              <div class="adopter-logos">
+                <div class="logo-tile logo-wide"><img src="../logos/logo-antgroup.jpeg" alt="Ant Group logo"></div>
+                <div class="logo-tile logo-wide"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></div>
+                <div class="logo-tile logo-wide"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></div>
+                <div class="logo-tile logo-text"><img src="../logos/logo-jd.svg" alt="JD.com logo"></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">Venture Capital</div>
+              <div class="adopter-list">Shunwei Capital · Fresh Capital<br>NYX Ventures</div>
+              <div class="adopter-logos">
+                <div class="logo-tile logo-tall"><img src="../logos/logo-shunwei.png" alt="Shunwei Capital logo"></div>
+                <div class="logo-tile"><img src="../logos/logo-nyx.jpeg" alt="NYX Ventures logo"></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">Global Teams &amp; Agencies</div>
+              <div class="adopter-list">SPM · Agrícola Campolor<br>Vivende Inmobiliaria</div>
+              <div class="adopter-logos three-up">
+                <div class="logo-tile"><img src="../logos/logo-spm.jpeg" alt="SPM Agency logo"></div>
+                <div class="logo-tile logo-wide"><img src="../logos/logo-campolor.webp" alt="Agricola Campolor logo"></div>
+                <div class="logo-tile"><img src="../logos/logo-vivende.png" alt="Vivende Inmobiliaria logo"></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 24px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--muted-soft); padding: 14px 0 0; border-top: 1px solid var(--border);">
+            Compliance note: listed organizations are examples of companies associated with registered or trial users. They do not imply official partnership, customer contract, or brand endorsement.
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>06 · ADOPTION ACROSS INDUSTRIES</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 07 · Talent coverage beyond AI ===== -->
+      <section class="slide s-content s-crossindustry grid-bg" data-screen-label="07 Cross-Industry">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">03 · Beyond Resume Data</div>
+            <h1 class="slide-title">Industry-agnostic<br>talent intelligence</h1>
+            <h2 class="slide-subtitle">DINQ applies the same evidence-first workflow across AI, industrial operations, manufacturing, global expansion, consumer markets, and expert networks.</h2>
+          </div>
+          <div class="right">5 SECTOR CASES</div>
+        </div>
+        <div class="body">
+          <div class="col-2-5-7">
+            <div>
+              <p class="lead" style="font-size: 18px; line-height: 1.6; color: var(--muted);">DINQ isn't just for software engineering. For deep-tech and AI roles, we track code repositories, research papers, and open-source contributions. For industrial, consumer, retail, and media sectors, we anchor searches in verified public company records, supply chain/channel signals, and media coverage to surface top-tier operators.</p>
+              <div style="margin-top: 24px; padding: 18px 22px; border-left: 2px solid var(--accent); background: var(--accent-glow);">
+                <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px;">SUMMARY</div>
+                <div style="font-size: 15px; line-height: 1.55; color: var(--fg);">Describe the target profile once. DINQ searches, verifies, and maps relevant people across open public sources.</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px;">REAL CASES</div>
+              <ul class="bullets" style="gap: 14px;">
+                <li>
+                  <div class="num">01</div>
+                  <div class="txt"><strong>Consumer Channel Search</strong><span>Target Assignment: Offline channel lead for premium audio brands</span></div>
+                </li>
+                <li>
+                  <div class="num">02</div>
+                  <div class="txt"><strong>Industrial Operations Discovery</strong><span>Target Assignment: Plant manager for livestock and dairy production facilities</span></div>
+                </li>
+                <li>
+                  <div class="num">03</div>
+                  <div class="txt"><strong>Localized Growth Talent Extraction</strong><span>Target Assignment: Latin America regional KOLs and overseas media operators</span></div>
+                </li>
+                <li>
+                  <div class="num">04</div>
+                  <div class="txt"><strong>Advanced Manufacturing Leadership Mapping</strong><span>Target Assignment: Semiconductor R&D and production directors</span></div>
+                </li>
+                <li>
+                  <div class="num">05</div>
+                  <div class="txt"><strong>Cross-Border Go-To-Market Sourcing</strong><span>Target Assignment: GTM leads with global execution and international expansion experience</span></div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>07 · BEYOND RESUME DATA</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 08 · Core Solution ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="08 Core Solution">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">04 · Talent Graph Infrastructure</div>
+            <h1 class="slide-title">DINQ is the AI engine<br>for evidence-based talent discovery</h1>
+            <h2 class="slide-subtitle">Search using natural language. DINQ autonomously scans public networks, resolves candidate identities, evaluates technical evidence, and turns raw data into a reusable talent operating system.</h2>
+          </div>
+          <div class="right">THREE UPGRADES</div>
+        </div>
+<div class="body">
+           <div class="upgrade-diagram">
+             <div class="upgrade-item">
+               <div class="upg-top">
+                 <div class="upg-label">Evidence-first discovery</div>
+                 <div class="upg-num">01</div>
+               </div>
+               <div class="upg-row">
+                 <div class="upg-before">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+                   <span>Scanning self-reported resumes</span>
+                 </div>
+                 <div class="upg-divider"></div>
+                 <div class="upg-after">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12A10 10 0 1 1 12 2"></path><polyline points="22 4 12 14 9 11"></polyline></svg>
+                   <span>Analyzing real-world work</span>
+                 </div>
+               </div>
+               <div class="upg-mini"><span>Code</span><i></i><span>Papers</span><i></i><span>Projects</span></div>
+             </div>
+             <div class="upgrade-item">
+               <div class="upg-top">
+                 <div class="upg-label">Intent-based retrieval</div>
+                 <div class="upg-num">02</div>
+               </div>
+               <div class="upg-row">
+                 <div class="upg-before">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+                   <span>Rigid keyword matching</span>
+                 </div>
+                 <div class="upg-divider"></div>
+                 <div class="upg-after">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+                   <span>Deep semantic intent + multi-step reasoning</span>
+                 </div>
+               </div>
+               <div class="upg-mini"><span>Profile</span><i></i><span>Reasoning</span><i></i><span>Verification</span></div>
+             </div>
+             <div class="upgrade-item">
+               <div class="upg-top">
+                 <div class="upg-label">Workflow automation</div>
+                 <div class="upg-num">03</div>
+               </div>
+               <div class="upg-row">
+                 <div class="upg-before">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                   <span>Manual sourcing spreadsheets</span>
+                 </div>
+                 <div class="upg-divider"></div>
+                 <div class="upg-after">
+                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                   <span>Search → Evaluate → Profile → Outreach → Track</span>
+                 </div>
+               </div>
+               <div class="upg-mini"><span>Search</span><i></i><span>Profile</span><i></i><span>Track</span></div>
+             </div>
+           </div>
+         </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>08 · TALENT GRAPH INFRASTRUCTURE</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 09 · Infrastructure ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="09 Knowledge Graph">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">04 · Talent Graph Infrastructure</div>
+            <h1 class="slide-title">Core Infrastructure<br>From public signals to a talent graph</h1>
+            <h2 class="slide-subtitle">DINQ integrates <span style="color: var(--accent); font-weight: 500;">500+ public data channels</span> across career history, open-source code, academic papers, AI models, shipped projects, personal sites, and company information.</h2>
+          </div>
+          <div class="right">FOUR CAPABILITIES</div>
+        </div>
+        <div class="body">
+          <div class="module-grid cols-4">
+            <div class="module-card">
+              <div class="mod-num">01</div>
+              <div class="mod-name">Cross-platform identity resolution<span class="en">Unified identities</span></div>
+              <div class="mod-desc">Links GitHub, Hugging Face, academic, professional, and open-web footprints into one coherent talent record.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">02</div>
+              <div class="mod-name">Network inference<span class="en">Relationship graph</span></div>
+              <div class="mod-desc">Maps co-authors, shared projects, alumni ties, colleagues, investments, and open-source collaboration from public signals.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">03</div>
+              <div class="mod-name">Semantic search<span class="en">Capability matching</span></div>
+              <div class="mod-desc">Search by capability, research area, tech stack, and industry experience without being limited to exact fields.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">04</div>
+              <div class="mod-name">Realtime unified index<span class="en">Live data layer</span></div>
+              <div class="mod-desc">Standardizes and refreshes the index so teams do not need to build scraping, cleaning, deduplication, or identity-resolution pipelines.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>09 · TALENT GRAPH INFRASTRUCTURE</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 10 · Modules Overview ===== -->
+      <section class="slide s-content s-modules grid-bg" data-screen-label="10 Modules Overview">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Product Workflow</div>
+            <h1 class="slide-title">One platform for search, evaluation, outreach,<br>and long-term talent operations</h1>
+          </div>
+          <div class="right">7 MODULES</div>
+        </div>
+        <div class="body">
+          <div class="module-grid cols-4" style="margin-bottom: 24px;">
+            <div class="module-card">
+              <div class="mod-num">M-01</div>
+              <div class="mod-name">Search<span class="en">NATURAL LANGUAGE</span></div>
+              <div class="mod-desc">Describe your ideal candidate in plain English. DINQ instantly uncovers evidence-backed talent across public repositories and the open web.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-02</div>
+              <div class="mod-name">API Playground<span class="en">DEVELOPER CONSOLE</span></div>
+              <div class="mod-desc">Test live search requests, tweak extraction parameters, and preview raw JSON schemas before executing deep product integrations.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-03</div>
+              <div class="mod-name">Talent Radar<span class="en">ALWAYS-ON SEARCH</span></div>
+              <div class="mod-desc">Turn manual sourcing into an automated background scan. Continuously surface fresh candidate matches for your evergreen and priority roles.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-04</div>
+              <div class="mod-name">Shortlist<span class="en">TALENT CRM</span></div>
+              <div class="mod-desc">Organize candidates into shared pipelines, track outreach status, collaborate with hiring managers, and bulk-export to your existing stack.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+          </div>
+          <div class="module-grid cols-3">
+            <div class="module-card">
+              <div class="mod-num">M-05</div>
+              <div class="mod-name">Integration<span class="en">API / MCP / EMAIL</span></div>
+              <div class="mod-desc">Seamlessly embed DINQ’s search intelligence directly into internal LLMs, custom autonomous agents, ATS platforms, and automated email workflows via API and MCP.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-06</div>
+              <div class="mod-name">Page<span class="en">DYNAMIC PROFILES</span></div>
+              <div class="mod-desc">Generate auto-updating public profiles that collapse deep technical evidence, project metrics, and code history into an easily digestible view.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-num">M-07</div>
+              <div class="mod-name">Organization<span class="en">COLLECTIVE NETWORKS</span></div>
+              <div class="mod-desc">Create dedicated spaces for companies, research labs, or open-source communities to benchmark collective team output and map target networks.</div>
+              <div class="mod-arrow">→</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>10 · PRODUCT WORKFLOW</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 11 · Search ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="11 Search">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Product Workflow · Search</div>
+            <h1 class="slide-title">Search<br>Turn a recruiting brief into ranked candidates</h1>
+            <h2 class="slide-subtitle">Describe the person you need in plain language. DINQ translates the brief into deep search logic, clarifies intent with intelligent follow-up questions, and verifies every match against public evidence.</h2>
+          </div>
+          <div class="right">M-01 · SEARCH</div>
+        </div>
+        <div class="body" style="display:flex;align-items:center;justify-content:center;gap:56px;padding-top:0;">
+          <div style="display:flex;align-items:flex-start;gap:18px;width:calc((100% - 56px) * 0.46);height:560px;">
+            <div
+              style="
+                flex:0 0 230px;
+                margin-top:34px;
+                padding:16px 18px;
+                border:1px solid rgba(255,255,255,0.58);
+                border-radius:20px;
+                background:rgba(255,255,255,0.52);
+                backdrop-filter:blur(18px) saturate(160%);
+                -webkit-backdrop-filter:blur(18px) saturate(160%);
+                box-shadow:0 18px 50px rgba(10,14,26,0.10);
+                color:#0a0e1a;
+                font-size:17px;
+                line-height:1.45;
+                font-weight:500;
+              "
+            >I’m looking for an engineer with experience in LLM inference optimization, ideally with CUDA, TensorRT, or vLLM. Open-source work is a plus. Location is flexible, with a preference for North America or remote.</div>
+            <img
+              src="product-images-en/product-search1.png"
+              alt="DINQ Search refinement screenshot"
+              style="
+                display:block;
+                width:auto;
+                height:560px;
+                max-width:calc(100% - 248px);
+                object-fit:contain;
+              "
+            />
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:18px;width:calc((100% - 56px) * 0.54);height:560px;">
+            <img
+              src="product-images-en/product-search2.png"
+              alt="DINQ Search results screenshot"
+              style="
+                display:block;
+                width:auto;
+                height:560px;
+                max-width:calc(100% - 248px);
+                object-fit:contain;
+              "
+            />
+            <div
+              style="
+                flex:0 0 230px;
+                margin-top:34px;
+                padding:16px 18px;
+                border:1px solid rgba(255,255,255,0.58);
+                border-radius:20px;
+                background:rgba(255,255,255,0.52);
+                backdrop-filter:blur(18px) saturate(160%);
+                -webkit-backdrop-filter:blur(18px) saturate(160%);
+                box-shadow:0 18px 50px rgba(10,14,26,0.10);
+                color:#0a0e1a;
+                font-size:17px;
+                line-height:1.45;
+                font-weight:500;
+              "
+            >Find me 20 engineers working on AI agent infrastructure, ideally with open-source contributions.</div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>11 · PRODUCT WORKFLOW</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 12 · Talent Profile ===== -->
+      <section class="slide s-content s-profile grid-bg" data-screen-label="12 Profile">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Product Workflow · Candidate Profile</div>
+            <h1 class="slide-title">Talent Profiles:<br>Instantly see why a candidate matches</h1>
+            <h2 class="slide-subtitle">DINQ does not stop at names. It generates standardized profiles from public technical evidence so teams can evaluate background, capability, and underlying data in one place.</h2>
+          </div>
+          <div class="right">6 SECTIONS</div>
+        </div>
+        <div class="body" style="display:grid;grid-template-columns:300px 1fr 300px;gap:28px;align-items:center;padding-top:4px;">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">01</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">Basic information</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Identity, role, company, location.</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">02</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">Education</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Degree, institution, advisor, focus.</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">03</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">Career history</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Roles, companies, timelines.</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid rgba(231,90,8,0.30);border-radius:16px;background:var(--accent-glow);box-shadow:0 16px 36px rgba(231,90,8,0.08);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">NOTE</div>
+              <div style="font-size:21px;font-weight:700;color:var(--fg-strong);line-height:1.2;">Name disambiguation</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Flags same-name candidates.</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;">
+            <img
+              src="product-images-en/product-search-profile.png"
+              alt="DINQ candidate profile product screenshot"
+              style="
+                width: auto;
+                height: 500px;
+                max-width: 100%;
+                object-fit: contain;
+              "
+            />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">04</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">Academic output</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Papers, citations, research work.</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">05</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">Key links</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Website, LinkedIn, Scholar, email.</div>
+            </div>
+            <div style="padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">06</div>
+              <div style="font-size:21px;font-weight:650;color:var(--fg-strong);line-height:1.2;">Source verification</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Every claim links to evidence.</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>12 · PRODUCT WORKFLOW</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 13 · API Playground ===== -->
+      <section class="slide s-content s-api grid-bg" data-screen-label="13 API">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Product Workflow · API Playground</div>
+            <h1 class="slide-title">API Playground<br>Make talent search programmable</h1>
+            <h2 class="slide-subtitle">Test DINQ search in the browser, tune request parameters visually, preview structured profiles, and instantly export reusable code snippets directly to engineering teams.</h2>
+          </div>
+          <div class="right">M-02 · API PLAYGROUND</div>
+        </div>
+        <div class="body" style="display:grid;grid-template-columns:300px 1fr 300px;gap:28px;align-items:center;padding-top:8px;">
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">01 · OUTPUT</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">Fast structured output</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Standardized data in seconds.</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">02 · PARAMS</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">Flexible query controls</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Query, count, activity, sources.</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">03 · PREVIEW</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">Dual preview modes</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Talent cards or raw JSON.</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;">
+            <img
+              src="product-images-en/product-apiplayground.png"
+              alt="DINQ API Playground product screenshot"
+              style="
+                width:auto;
+                height:520px;
+                max-width:100%;
+                object-fit:contain;
+              "
+            />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">04 · CODE</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">Auto-generated code</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Python, TypeScript, and cURL.</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid rgba(231,90,8,0.30);border-radius:16px;background:var(--accent-glow);box-shadow:0 16px 36px rgba(231,90,8,0.08);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">05 · MAPPING</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">Talent-market mapping</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Fields, companies, sectors, regions.</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>13 · PRODUCT WORKFLOW</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 14 · Integration (API/MCP) ===== -->
+      <section class="slide s-content s-integration grid-bg" data-screen-label="14 Integration">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Product Workflow · Integration</div>
+            <h1 class="slide-title">Integration<br>Embed DINQ intelligence into your tech stack and AI agents</h1>
+            <h2 class="slide-subtitle">DINQ moves beyond a standalone web tool into <span style="color: var(--accent); font-weight: 500;">an enterprise-grade talent infrastructure</span> that LLMs, autonomous workflows, and internal applications can query directly.</h2>
+          </div>
+          <div class="right">M-05 · INTEGRATION</div>
+        </div>
+        <div class="body" style="display:grid;grid-template-columns:300px 1fr 300px;gap:28px;align-items:center;padding-top:8px;">
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">01 · API</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">API access</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Sync profiles into internal tools.</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">02 · MCP</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">Agent client access</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">AI clients can call DINQ directly.</div>
+            </div>
+            <div style="padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(10,14,26,0.055);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:8px;">03 · AGENT</div>
+              <div style="font-size:22px;font-weight:700;color:var(--fg-strong);line-height:1.2;">Agent workflows</div>
+              <div style="font-size:15px;line-height:1.4;color:var(--muted);margin-top:7px;">Async search, progress, results.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center;">
+            <img
+              src="product-images-en/product-integration1.png"
+              alt="DINQ Integration product screenshot"
+              style="
+                width:100%;
+                height:520px;
+                object-fit:contain;
+              "
+            />
+            <img
+              src="product-images-en/product-integration2.png"
+              alt="DINQ API code product screenshot"
+              style="
+                width:100%;
+                height:520px;
+                object-fit:contain;
+              "
+            />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="padding:18px 20px;border:1px solid rgba(231,90,8,0.30);border-radius:18px;background:var(--accent-glow);box-shadow:0 16px 36px rgba(231,90,8,0.08);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;letter-spacing:0.16em;color:var(--accent);margin-bottom:10px;">CORE VALUE</div>
+              <div style="font-size:25px;font-weight:750;color:var(--fg-strong);line-height:1.2;">Talent discovery becomes callable infrastructure</div>
+              <div style="font-size:16px;line-height:1.48;color:var(--muted);margin-top:12px;">From manual collection to automated analysis.</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.72);font-size:17px;font-weight:650;color:var(--fg-strong);text-align:center;">Recruiting</div>
+              <div style="padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.72);font-size:17px;font-weight:650;color:var(--fg-strong);text-align:center;">Investment research</div>
+              <div style="padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.72);font-size:17px;font-weight:650;color:var(--fg-strong);text-align:center;">Market research</div>
+              <div style="padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.72);font-size:17px;font-weight:650;color:var(--fg-strong);text-align:center;">Reports</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>14 · PRODUCT WORKFLOW</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 15 · Talent Radar ===== -->
+      <section class="slide s-content grid-bg" data-screen-label="15 Talent Radar">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Product Workflow · Talent Radar</div>
+            <h1 class="slide-title">Talent Radar<br>Put your high-priority sourcing on autopilot</h1>
+            <h2 class="slide-subtitle">Talent Radar continuously scans the talent landscape in the background, automatically feeding your pipeline with fresh matches 24/7.</h2>
+          </div>
+          <div class="right">M-03 · TALENT RADAR</div>
+        </div>
+        <div class="body" style="position:relative;display:flex;align-items:center;justify-content:center;padding-top:8px;">
+          <img
+            src="product-images-en/product-talentradar1.png"
+            alt="DINQ Talent Radar main product screenshot"
+            style="
+              width:1320px;
+              max-height:520px;
+              object-fit:contain;
+            "
+          />
+          <img
+            src="product-images-en/product-talentradar2.png"
+            alt="DINQ Talent Radar creation modal screenshot"
+            style="
+              position:absolute;
+              right:105px;
+              top:72px;
+              width:390px;
+              height:auto;
+              object-fit:contain;
+              filter:drop-shadow(0 28px 42px rgba(10,14,26,0.22)) drop-shadow(0 8px 14px rgba(10,14,26,0.10));
+              border-radius:22px;
+            "
+          />
+          <div style="position:absolute;left:180px;bottom:42px;display:flex;gap:12px;">
+            <div style="padding:13px 18px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:18px;font-weight:650;color:var(--fg-strong);">Define target needs</div>
+            <div style="padding:13px 18px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,0.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:18px;font-weight:650;color:var(--fg-strong);">Automate background scans</div>
+            <div style="padding:13px 18px;border:1px solid rgba(231,90,8,0.30);border-radius:999px;background:var(--accent-glow);font-size:18px;font-weight:700;color:var(--fg-strong);">Review fresh matches</div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>15 · PRODUCT WORKFLOW</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 16 · Shortlist ===== -->
+      <section class="slide s-content s-shortlist grid-bg" data-screen-label="16 Shortlist">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Product Workflow · Shortlist</div>
+            <h1 class="slide-title">Shortlist<br>Turn candidate lists into reusable team assets</h1>
+            <h2 class="slide-subtitle">DINQ helps teams move beyond one-time search exports. Archive discovered talent, organize functional folders, track pipeline status, and seamlessly reactivate legacy pools over time.</h2>
+          </div>
+          <div class="right">M-04 · SHORTLIST</div>
+        </div>
+        <div class="body" style="position:relative;display:grid;grid-template-columns:1.08fr 0.92fr;gap:34px;align-items:center;padding-top:8px;">
+          <img
+            src="product-images-en/product-shortlist1.png"
+            alt="DINQ Shortlist save candidates screenshot"
+            style="
+              width:100%;
+              height:520px;
+              object-fit:contain;
+            "
+          />
+          <img
+            src="product-images-en/product-shortlist2.png"
+            alt="DINQ Shortlist asset library screenshot"
+            style="
+              width:100%;
+              height:520px;
+              object-fit:contain;
+            "
+          />
+          <div class="shortlist-lens lens-left">
+            <div class="lens-text">Bulk actions</div>
+          </div>
+          <div class="shortlist-lens lens-top">
+            <div class="lens-text">Full-funnel status tracking</div>
+          </div>
+          <div class="shortlist-lens lens-bottom">
+            <div class="lens-text">Long-term talent assets</div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>16 · PRODUCT WORKFLOW</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 17 · Outreach ===== -->
+      <section class="slide s-content s-outreach grid-bg" data-screen-label="17 Outreach">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">05 · Product Workflow · Outreach</div>
+            <h1 class="slide-title">Outreach<br>Personalized engagement with human oversight</h1>
+            <h2 class="slide-subtitle">DINQ helps teams move from verified profiles to context-aware outreach while ensuring contact verification, message personalization, and final delivery remain under absolute user control.</h2>
+          </div>
+          <div class="right">M-05 · OUTREACH</div>
+        </div>
+        <div class="body" style="position:relative;display:grid;grid-template-columns:1.04fr 0.96fr;gap:18px;align-items:center;padding-top:0;">
+          <div style="position:relative;height:480px;display:flex;align-items:center;">
+            <img
+              src="product-images-en/product-outreach1.png"
+              alt="DINQ outreach candidate profile and compliant contact screenshot"
+              style="
+                width:100%;
+                height:480px;
+                object-fit:contain;
+                filter:drop-shadow(0 26px 48px rgba(10,14,26,0.10));
+              "
+            />
+            <div style="position:absolute;left:24px;top:36px;width:258px;padding:16px 18px;border:1px solid rgba(255,255,255,0.72);border-radius:18px;background:rgba(255,255,255,0.58);backdrop-filter:blur(18px) saturate(165%);-webkit-backdrop-filter:blur(18px) saturate(165%);box-shadow:0 20px 48px rgba(10,14,26,0.12);">
+              <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:0.16em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;">CONTACT</div>
+              <div style="font-size:20px;font-weight:760;line-height:1.25;color:var(--fg-strong);">Compliant contact retrieval</div>
+            </div>
+          </div>
+          <div style="position:relative;min-height:438px;display:flex;flex-direction:column;justify-content:flex-start;gap:8px;">
+            <img
+              src="product-images-en/product-outreach2.png"
+              alt="DINQ generated outreach email preview screenshot"
+              style="
+                width:370px;
+                max-width:100%;
+                align-self:flex-start;
+                transform:translateX(4px);
+                border-radius:20px;
+                filter:drop-shadow(0 28px 48px rgba(10,14,26,0.20)) drop-shadow(0 8px 14px rgba(10,14,26,0.10));
+              "
+            />
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="padding:12px 14px 11px;border:1px solid rgba(15,23,42,0.10);border-radius:16px;background:rgba(255,255,255,0.78);box-shadow:0 14px 32px rgba(10,14,26,0.06);">
+                <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:var(--accent);font-weight:760;margin-bottom:8px;">01</div>
+                <div style="font-size:17px;font-weight:760;color:var(--fg-strong);line-height:1.2;">Personalized outreach email</div>
+                <div style="font-size:12px;line-height:1.35;color:var(--muted);margin-top:5px;">Generated from papers, open-source projects, and research direction.</div>
+              </div>
+              <div style="padding:12px 14px 11px;border:1px solid rgba(15,23,42,0.10);border-radius:16px;background:rgba(255,255,255,0.78);box-shadow:0 14px 32px rgba(10,14,26,0.06);">
+                <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:var(--accent);font-weight:760;margin-bottom:8px;">02</div>
+                <div style="font-size:17px;font-weight:760;color:var(--fg-strong);line-height:1.2;">Editable before sending</div>
+                <div style="font-size:12px;line-height:1.35;color:var(--muted);margin-top:5px;">Adjust tone, role introduction, and invitation content.</div>
+              </div>
+              <div style="padding:12px 14px 11px;border:1px solid rgba(15,23,42,0.10);border-radius:16px;background:rgba(255,255,255,0.78);box-shadow:0 14px 32px rgba(10,14,26,0.06);">
+                <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:var(--accent);font-weight:760;margin-bottom:8px;">03</div>
+                <div style="font-size:17px;font-weight:760;color:var(--fg-strong);line-height:1.2;">Two-channel communication</div>
+                <div style="font-size:12px;line-height:1.35;color:var(--muted);margin-top:5px;">Supports in-app messaging and native email integration.</div>
+              </div>
+              <div style="padding:12px 14px 11px;border:1px solid rgba(231,90,8,0.22);border-radius:16px;background:var(--accent-glow);box-shadow:0 14px 32px rgba(231,90,8,0.06);">
+                <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;color:var(--accent);font-weight:760;margin-bottom:8px;">REVIEW</div>
+                <div style="font-size:17px;font-weight:760;color:var(--fg-strong);line-height:1.2;">Human review required</div>
+                <div style="font-size:12px;line-height:1.35;color:var(--muted);margin-top:5px;">Mandatory verification to ensure all AI copy aligns with real corporate identities.</div>
+              </div>
+            </div>
+            <div style="padding:10px 14px;border:1px solid rgba(231,90,8,0.24);border-radius:14px;background:rgba(255,246,241,0.78);font-size:12px;line-height:1.35;color:var(--fg);">
+              <strong style="color:var(--accent);">Compliance note:</strong> Respect candidate preferences. Do not use spam-like bulk outreach.
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>17 · PRODUCT WORKFLOW</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 18 · Data Sources ===== -->
+      <section class="slide s-content s-sources grid-bg" data-screen-label="18 Data Sources">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">06 · Trust &amp; Traceability</div>
+            <h1 class="slide-title">Data sources<br>behind DINQ talent intelligence</h1>
+          </div>
+          <div class="right">500+ SOURCES</div>
+        </div>
+        <div class="body">
+          <div class="source-vendor-layout">
+            <div class="source-panel">
+              <div class="source-panel-head">Sources &amp; Linking</div>
+              <div class="source-panel-body">
+                <div class="source-intro">DINQ compiles talent profiles from <strong>public professional, technical, academic, company, and community signals</strong>. Each profile links back to source-level evidence so teams can verify claims instead of trusting a static resume.</div>
+                <div class="source-logo-wall">
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-linkedin.png" alt="LinkedIn logo"></div>
+                  <div class="source-logo-cell logo-mark"><img src="../logos/source-x.png" alt="X logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-github.png" alt="GitHub logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-google-scholar.png" alt="Google Scholar logo"></div>
+                  <div class="source-logo-cell logo-mark"><img src="../logos/source-openreview.png" alt="OpenReview logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-crunchbase.png" alt="Crunchbase logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-arxiv.png" alt="arXiv logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-university-data.png" alt="University data logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-reddit.png" alt="Reddit logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-pubmed.png" alt="PubMed logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-product-hunt.png" alt="Product Hunt logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-openalex.png" alt="OpenAlex logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-cvpr.png" alt="CVPR logo"></div>
+                  <div class="source-logo-cell logo-mark"><img src="../logos/source-neurips.png" alt="NeurIPS logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-iccv.png" alt="ICCV logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-google-patents.png" alt="Google Patents logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-pitchbook.png" alt="PitchBook logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-huggingface.svg" alt="Hugging Face logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-kaggle.png" alt="Kaggle logo"></div>
+                </div>
+              </div>
+            </div>
+            <div class="source-panel coverage-panel">
+              <div class="source-panel-head">Evidence Coverage</div>
+              <div class="source-panel-body">
+                <div class="coverage-list">
+                  <div class="coverage-item">
+                    <div class="label">Professional graph</div>
+                    <strong>Career, company, and investor context</strong>
+                    <span>LinkedIn, Crunchbase, PitchBook, university data, and open company records help connect roles, employers, funding history, and organizational networks.</span>
+                  </div>
+                  <div class="coverage-item">
+                    <div class="label">Technical graph</div>
+                    <strong>Code, models, projects, and benchmarks</strong>
+                    <span>GitHub, Hugging Face, Kaggle, Product Hunt, Google Patents, and open-web project pages reveal what people have actually built.</span>
+                  </div>
+                  <div class="coverage-item">
+                    <div class="label">Research graph</div>
+                    <strong>Papers, citations, venues, and peer review</strong>
+                    <span>Google Scholar, OpenReview, arXiv, PubMed, OpenAlex, CVPR, NeurIPS, and ICCV surface research output and verified technical depth.</span>
+                  </div>
+                  <div class="coverage-item">
+                    <div class="label">Community graph</div>
+                    <strong>Public discussion and distribution signals</strong>
+                    <span>X, Reddit, and other public communities add context on visibility, expertise, and ecosystem influence.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>18 · TRUST &amp; TRACEABILITY</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 19 · Data Freshness ===== -->
+      <section class="slide s-content s-freshness grid-bg" data-screen-label="19 Freshness">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">06 · Trust &amp; Traceability</div>
+            <h1 class="slide-title">Trustworthy profiles built on<br>traceable, real-time evidence</h1>
+            <h2 class="slide-subtitle">DINQ goes beyond raw data collection. We standardize fragmented public signals into a searchable, assessment-ready talent graph—continuously synced so your insights are never stale.</h2>
+          </div>
+          <div class="right">UPDATE FREQUENCY</div>
+        </div>
+        <div class="body" style="padding-bottom: 8px;">
+          <ul class="bullets" style="gap: 10px;">
+            <li>
+              <div class="num">GH</div>
+              <div class="txt">
+                <strong>GitHub</strong>
+                <span>Developer activity is collected continuously. High-signal accounts and repositories sync every 20–30 minutes, with full project summaries compiled every 6 hours.</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">HF</div>
+              <div class="txt">
+                <strong>Hugging Face</strong>
+                <span>Models, datasets, and Spaces update every 30 minutes. Personal and organization pages sync hourly, with incremental index refreshes every few minutes.</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">AC</div>
+              <div class="txt">
+                <strong>Academic platforms</strong>
+                <span>Paper data is updated incrementally every 30 minutes; scholar profiles are refined daily.</span>
+              </div>
+            </li>
+            <li>
+              <div class="num">WB</div>
+              <div class="txt">
+                <strong>Open web and professional data</strong>
+                <span>Fetched in real time during active user searches, ensuring the most up-to-date live data available from public sources and third-party indexes.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>19 · TRUST &amp; TRACEABILITY</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 20 · Competition ===== -->
+      <section class="slide s-content s-competition grid-bg" data-screen-label="20 Competition">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">07 · Benchmark Results</div>
+            <h1 class="slide-title">Competitive Comparison<br>Where DINQ is different</h1>
+          </div>
+          <div class="right">5 COMPETITORS</div>
+        </div>
+        <div class="body">
+          <table class="compare">
+            <thead>
+              <tr>
+                <th>Product / Category</th>
+                <th>Core capability</th>
+                <th>Key limitation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="name"><div class="brand-lockup"><img src="../logos/logo-linkedin.svg" alt="LinkedIn logo" /><div class="brand-text"><strong>LinkedIn</strong><span>LinkedIn</span></div></div></td>
+                <td>Professional profiles and the world’s largest business network</td>
+                <td>Mostly self-reported profiles, with limited code, paper, or cross-platform technical evidence</td>
+              </tr>
+              <tr>
+                <td class="name"><div class="brand-lockup"><img src="../logos/logo-exa-icon.png" alt="Exa logo" /><div class="brand-text"><strong>Exa</strong><span>Search</span></div></div></td>
+                <td>Fast web retrieval for broad research and preliminary screening</td>
+                <td>Returns links rather than providing standardized talent profiles, identity resolution, or verification workflows</td>
+              </tr>
+              <tr>
+                <td class="name"><div class="brand-lockup"><img src="../logos/logo-exa-icon.png" alt="Exa logo" /><div class="brand-text"><strong>Exa</strong><span>Websets</span></div></div></td>
+                <td>Strong webset-style AI verification and timely English-language search</td>
+                <td>Less suited for file-based recruiting inputs, complex Chinese-language needs, and downstream talent operations</td>
+              </tr>
+              <tr>
+                <td class="name"><div class="brand-lockup"><img class="logo-wide" src="../logos/logo-juicebox.svg" alt="Juicebox logo" /><div class="brand-text"><strong>PeopleGPT</strong><span>Juicebox</span></div></div></td>
+                <td>AI recruiting workflow for search, insights, and outreach</td>
+                <td>Less optimized for Chinese-language semantics, cross-border scenarios, and open technical evidence beyond conventional recruiting sources</td>
+              </tr>
+              <tr>
+                <td class="name"><div class="brand-lockup"><div class="logo-ats">ATS</div><div class="brand-text"><strong>ATS</strong><span>Recruiting system</span></div></div></td>
+                <td>Manages recruiting workflows only</td>
+                <td>Does not discover talent, enrich profiles, evaluate technical ability, or generate personalized outreach</td>
+              </tr>
+              <tr class="row-dinq">
+                <td class="name"><div class="brand-lockup"><img class="logo-dinq" src="../logos/logo-dinq-new.jpg" alt="DINQ logo"><div class="brand-text"><strong>DINQ</strong><span>AI Talent Search</span></div></div></td>
+                <td class="dinq">An all-in-one, AI-native talent engine combining deep technical verification, robust cross-border/multilingual semantics, identity resolution, and seamless end-to-end sourcing workflows.</td>
+                <td class="dinq">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>20 · BENCHMARK RESULTS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 21 · Benchmark ===== -->
+      <section class="slide s-content s-benchmark grid-bg" data-screen-label="21 Benchmark">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">07 · Benchmark Results</div>
+            <h1 class="slide-title">Benchmark Results<br>Complex requirements expose the performance gap.</h1>
+            <h2 class="slide-subtitle">Across 14 standardized validation scenarios, DINQ demonstrates maximum precision on ambiguous briefs, multi-format inputs, cross-language processing, and multi-step evidence verification.</h2>
+          </div>
+          <div class="right">14 SCENARIOS</div>
+        </div>
+        <div class="body">
+          <div class="bench-wrap">
+            <div class="bench-section-label">The Core Performance Pillars</div>
+            <div class="bench-grid">
+              <div class="bench-table">
+                <div class="bench-row head">
+                  <div class="bench-cell">Core performance pillar</div>
+                  <div class="bench-cell">The gap</div>
+                  <div class="bench-cell">DINQ capability</div>
+                </div>
+                <div class="bench-row">
+                  <div class="bench-cell"><strong>Ambiguous Brief Processing</strong><span>Conversational search criteria</span></div>
+                  <div class="bench-cell"><strong>The Gap:</strong><span>Legacy tools require rigid, literal keywords.</span></div>
+                  <div class="bench-cell accent"><strong>DINQ Capability:</strong><span>Translates conversational, highly subjective team descriptions into concrete technical constraints.</span></div>
+                </div>
+                <div class="bench-row">
+                  <div class="bench-cell"><strong>Multi-Step Evidence Verification</strong><span>Cross-source validation</span></div>
+                  <div class="bench-cell"><strong>The Gap:</strong><span>Standard search engines pull unverified profile text.</span></div>
+                  <div class="bench-cell accent"><strong>DINQ Capability:</strong><span>Cross-references repositories, citations, and model data to flag and filter out inflated claims.</span></div>
+                </div>
+                <div class="bench-row">
+                  <div class="bench-cell"><strong>Native Multi-Format Ingestion</strong><span>File and document input</span></div>
+                  <div class="bench-cell"><strong>The Gap:</strong><span>Competitors rely exclusively on manual text entry fields.</span></div>
+                  <div class="bench-cell accent"><strong>DINQ Capability:</strong><span>Directly parses raw PDF job descriptions, organizational charts, and slide decks to minimize input friction.</span></div>
+                </div>
+                <div class="bench-row">
+                  <div class="bench-cell"><strong>Cross-Language Semantic Search</strong><span>Bilingual technical parsing</span></div>
+                  <div class="bench-cell"><strong>The Gap:</strong><span>Global talent software falters on regional technical terms and Chinese linguistic nuances.</span></div>
+                  <div class="bench-cell accent"><strong>DINQ Capability:</strong><span>Native bilingual model parsing maps localized execution histories to international job standards.</span></div>
+                </div>
+              </div>
+              <div class="bench-side">
+                <div class="bench-note">
+                  <div class="note-num">14</div>
+                  <div class="note-title">standardized validation scenarios</div>
+                  <div class="note-text">DINQ’s advantage compounds when requirements are ambiguous, file-based, cross-language, or dependent on multi-step evidence verification.</div>
+                </div>
+                <div class="bench-note" style="border-color:rgba(15,23,42,0.10);background:rgba(255,255,255,0.78);box-shadow:0 14px 34px rgba(10,14,26,0.045);">
+                  <div class="note-title" style="font-size:20px;">Performance gap</div>
+                  <div class="note-text">Legacy sourcing workflows narrow quickly when the input is subjective, multilingual, document-based, or evidence-heavy.</div>
+                </div>
+              </div>
+            </div>
+            <div class="bench-flow">
+              <div class="flow-label">WORKFLOW UPGRADE</div>
+              <div class="flow-chip">Search</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-chip">API Playground</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-chip">Integration</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-chip">Shortlist</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-chip">Talent Radar</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>21 · BENCHMARK RESULTS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 22 · Validation ===== -->
+      <section class="slide s-content s-validation grid-bg" data-screen-label="22 Endorsement">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">08 · Validation Signals</div>
+            <h1 class="slide-title">Market Validation<br>Early signals from users and ecosystems</h1>
+            <h2 class="slide-subtitle">DINQ is gaining validation from AI and cloud ecosystems, early enterprise and professional users, and global business and technology media distribution.</h2>
+          </div>
+          <div class="right">3 DIMENSIONS</div>
+        </div>
+        <div class="body">
+          <div class="col-2" style="gap: 40px;align-items:stretch;">
+            <div style="display: flex; flex-direction: column; gap: 18px;">
+              <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">01 · Global ecosystem programs</div>
+              <div class="endorse-logo-grid">
+                <div class="endorse-logo"><img src="../logos/logo-nvidia.svg" alt="NVIDIA logo"></div>
+                <div class="endorse-logo" style="font-size:18px;font-weight:760;color:var(--fg-strong);">AWS</div>
+                <div class="endorse-logo"><img src="../logos/logo-google-cloud.svg" alt="Google Cloud logo"></div>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">02 · Top talent onboarded</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">DeepSeek</div>
+                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">Qwen</div>
+                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">OpenAI</div>
+                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">Meta</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">03 · Public media distribution</div>
+              <div style="font-size: 16px; line-height: 1.5; color: var(--muted); margin-bottom: 14px;">DINQ has distributed official news through North American and global business and technology media channels.</div>
+              <div style="font-size: 20px; line-height: 1.8; color: var(--fg);">Yahoo Finance · Associated Press · MarketWatch · The Globe and Mail · TradingView · EQS News · Digital Journal · International Business Times</div>
+              <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);">
+                <div style="font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.1em; line-height:1.45; color: var(--muted-soft);">Compliance note: listed organizations are examples of companies associated with registered or trial users. They do not imply official partnership, customer contract, or brand endorsement.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>22 · VALIDATION SIGNALS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 23 · Core Team ===== -->
+      <section class="slide s-content s-team grid-bg" data-screen-label="23 Team">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">08 · Validation Signals</div>
+            <h1 class="slide-title">Core Team<br>AI-native builders with HR veterans</h1>
+            <h2 class="slide-subtitle">DINQ brings together open-source AI credibility, recruiting infrastructure experience, B2B SaaS execution, and global talent-market strategy.</h2>
+          </div>
+          <div class="right">3 MEMBERS</div>
+        </div>
+        <div class="body">
+          <div class="col-3" style="gap: 28px;">
+            <div class="team-card">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
+                <div style="width:44px;height:44px;border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--accent);background:var(--surface-2);flex-shrink:0;">SG</div>
+                <div><div class="team-name">Sam Gao</div></div>
+              </div>
+              <div class="team-role">Founder &amp; CEO</div>
+              <div class="team-bio">PhD from USTC and former Alibaba DAMO Academy researcher. Recognized open-source contributor: DeepFaceLab ranked No. 2 globally on GitHub in 2020 with 46K stars, and the Eliza OS whitepaper ranked first in monthly popularity. Operates a 20K+ Chinese AI researcher community.</div>
+              <div class="team-logo-row">
+                <div class="team-logo-chip icon"><img src="../logos/logo-qingke.png" alt="Qingke logo"></div>
+                <div class="team-logo-chip damo"><img src="../logos/logo-damo-academy.webp" alt="Damo Academy logo"></div>
+              </div>
+            </div>
+            <div class="team-card">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
+                <div style="width:44px;height:44px;border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--accent);background:var(--surface-2);flex-shrink:0;">KS</div>
+                <div><div class="team-name">Kelvin Sun</div></div>
+              </div>
+              <div class="team-role">Co-founder</div>
+              <div class="team-bio">University of Sydney master’s graduate and repeat founder in recruiting infrastructure. Previously worked in HR at Sequoia Capital and Lighthouse Capital, with deep experience in talent systems and B2B SaaS commercialization.</div>
+              <div class="team-logo-row">
+                <div class="team-logo-chip"><img src="../logos/logo-hongshan.png" alt="HongShan logo"></div>
+                <div class="team-logo-chip"><img src="../logos/logo-thomson-reuters.png" alt="Thomson Reuters logo"></div>
+              </div>
+            </div>
+            <div class="team-card">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
+                <div style="width:44px;height:44px;border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--accent);background:var(--surface-2);flex-shrink:0;">JL</div>
+                <div><div class="team-name">Jian Lu</div></div>
+              </div>
+              <div class="team-role">Advisor</div>
+              <div class="team-bio">Dartmouth PhD, former President of LinkedIn China, and former Global Chief Consulting Partner at CGL. Mentor at Tsinghua University’s Schwarzman College, with deep global talent-market strategy and network resources.</div>
+              <div class="team-logo-row">
+                <div class="team-logo-chip icon"><img src="../logos/logo-cgl.jpeg" alt="CGL logo"></div>
+                <div class="team-logo-chip"><img src="../logos/logo-linkedin.svg" alt="LinkedIn logo"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>23 · VALIDATION SIGNALS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 24 · Use Cases ===== -->
+      <section class="slide s-content s-usecases grid-bg" data-screen-label="24 Use Cases">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">09 · Business Applications</div>
+            <h1 class="slide-title">Core Applications<br>Deploying evidence-based talent intelligence across diverse operational models.</h1>
+          </div>
+          <div class="right">10 SCENARIOS</div>
+        </div>
+        <div class="body">
+          <div class="col-2" style="gap: 48px;">
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px;">A · Deep Tech · Research · Investment</div>
+              <ul class="bullets" style="gap: 12px;">
+                <li>
+                  <div class="num">01</div>
+                  <div class="txt"><strong>Frontier Sourcing</strong><span>Pinpoint elite innovators in AI, semiconductors, and biotech using verified academic and code proof.</span></div>
+                </li>
+                <li>
+                  <div class="num">02</div>
+                  <div class="txt"><strong>Ecosystem Mapping</strong><span>Track and rank high-signal, active technical contributors across GitHub and Hugging Face.</span></div>
+                </li>
+                <li>
+                  <div class="num">03</div>
+                  <div class="txt"><strong>Hybrid Search</strong><span>Identify rare professionals combining academic research, engineering output, and team leadership.</span></div>
+                </li>
+                <li>
+                  <div class="num">04</div>
+                  <div class="txt"><strong>Fund Advisory</strong><span>Empower venture capital pipelines to source technical co-founders, advisors, and foundational stealth hires.</span></div>
+                </li>
+                <li>
+                  <div class="num">05</div>
+                  <div class="txt"><strong>System Enrichment</strong><span>Inject DINQ's talent graph natively into existing internal ATS, CRM, or agent workflows.</span></div>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px;">B · Industrial · Consumer · Global Expansion</div>
+              <ul class="bullets" style="gap: 12px;">
+                <li>
+                  <div class="num">06</div>
+                  <div class="txt"><strong>Asset Capitalization</strong><span>Enable labs and communities to preserve and leverage collective institutional networks.</span></div>
+                </li>
+                <li>
+                  <div class="num">07</div>
+                  <div class="txt"><strong>Supply Chain Operations</strong><span>Discover plant managers and production leaders across heavy manufacturing and physical logistics.</span></div>
+                </li>
+                <li>
+                  <div class="num">08</div>
+                  <div class="txt"><strong>Consumer Distribution</strong><span>Identify specialized offline channel leaders and commercialization experts to scale retail lines.</span></div>
+                </li>
+                <li>
+                  <div class="num">09</div>
+                  <div class="txt"><strong>Growth Localization</strong><span>Extract and vet regional media operators and local digital KOLs for international campaigns.</span></div>
+                </li>
+                <li>
+                  <div class="num">10</div>
+                  <div class="txt"><strong>Global GTM Sourcing</strong><span>Uncover experienced commercialization executives to navigate new cross-border jurisdictions.</span></div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>24 · BUSINESS APPLICATIONS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 25 · Closing ===== -->
+      <section class="slide s-closing grid-bg" data-screen-label="25 Closing">
+        <span class="corner-dot tl"></span>
+        <span class="corner-dot tr"></span>
+        <span class="corner-dot bl"></span>
+        <span class="corner-dot br"></span>
+        <div class="closing-inner">
+          <div class="cover-top" style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase;">
+            <div style="font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: var(--fg-strong); text-transform: none;">DINQ<span style="color: var(--accent);">.</span></div>
+            <div>11 · Conclusion &amp; Strategic Outlook</div>
+          </div>
+          <div class="closing-main">
+            <div class="cover-eyebrow" style="font-family: var(--font-mono); font-size: 18px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; display: flex; align-items: center; gap: 18px;">
+              <span style="width: 60px; height: 1px; background: var(--accent); display: inline-block;"></span>
+              Thank you
+            </div>
+            <h1 class="closing-title">Thank you<br><span class="accent">Visit DINQ</span></h1>
+            <div class="closing-sub">Explore talent search for the AI era.</div>
+            <a class="closing-url" href="https://dinq.me/" target="_blank" rel="noopener">
+              <span class="url-label">Visit our page</span>
+              <span class="url-text">https://dinq.me/</span>
+            </a>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 32px; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.2em; color: var(--muted-soft); text-transform: uppercase;">
+            <div>AI-Native Talent Search · © 2026</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <nav class="deck-counter" role="navigation" aria-label="Deck navigation">
+    <button type="button" id="deck-prev" aria-label="Previous slide">‹</button>
+    <span class="deck-count"><span id="deck-cur" aria-live="polite" aria-atomic="true">01</span> <span class="total">/ <span id="deck-total">01</span></span></span>
+    <button type="button" id="deck-next" aria-label="Next slide">›</button>
+  </nav>
+  <div class="deck-hint">← / → · space</div>
+
+  <script>
+    (function () {
+      var stage = document.getElementById('deck-stage');
+      var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+      var prev = document.getElementById('deck-prev');
+      var next = document.getElementById('deck-next');
+      var cur = document.getElementById('deck-cur');
+      var total = document.getElementById('deck-total');
+      var STORE = 'deck:idx:' + (location.pathname || '/');
+      var idx = 0;
+      function fit() {
+        var sw = window.innerWidth;
+        var pad = 48;
+        var s = Math.min((sw - pad) / 1920, 1);
+        if (!isFinite(s) || s <= 0) s = 1;
+        stage.style.transform = 'none';
+        stage.style.zoom = s;
+      }
+      function pad2(n) { return (n < 10 ? '0' : '') + n; }
+      function paint() {
+        if (cur) cur.textContent = pad2(idx + 1);
+        if (total) total.textContent = pad2(slides.length);
+        if (prev) prev.toggleAttribute('disabled', idx <= 0);
+        if (next) next.toggleAttribute('disabled', idx >= slides.length - 1);
+      }
+      function go(i) {
+        idx = Math.max(0, Math.min(slides.length - 1, i));
+        paint();
+        if (slides[idx]) slides[idx].scrollIntoView({ block: 'start', behavior: 'smooth' });
+        try { localStorage.setItem(STORE, String(idx)); } catch (_) {}
+      }
+      function onKey(e) {
+        var t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(idx + 1); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(idx - 1); }
+        else if (e.key === 'Home') { e.preventDefault(); go(0); }
+        else if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+      }
+      window.addEventListener('keydown', onKey, true);
+      if (prev) prev.addEventListener('click', function () { go(idx - 1); });
+      if (next) next.addEventListener('click', function () { go(idx + 1); });
+      document.body.setAttribute('tabindex', '-1');
+      document.body.style.outline = 'none';
+      function focusDeck() { try { window.focus(); document.body.focus({ preventScroll: true }); } catch (_) {} }
+      document.addEventListener('mousedown', focusDeck);
+      window.addEventListener('load', focusDeck);
+      try {
+        var saved = parseInt(localStorage.getItem(STORE) || '0', 10);
+        if (!isNaN(saved) && saved >= 0 && saved < slides.length) idx = saved;
+      } catch (_) {}
+      window.addEventListener('resize', fit);
+      fit();
+      paint();
+      focusDeck();
+    })();
+  </script>
+
+
+</body></html>
