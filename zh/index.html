@@ -1050,6 +1050,125 @@
       font-size: 16px; line-height: 1.55;
       color: var(--muted);
     }
+    .source-vendor-layout {
+      display: grid;
+      grid-template-columns: 1.65fr 0.9fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+    .source-panel {
+      border: 1px solid var(--border-strong);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 18px 48px rgba(10, 14, 26, 0.055);
+      overflow: hidden;
+    }
+    .source-panel-head {
+      padding: 15px 22px;
+      border-bottom: 1px solid var(--border-strong);
+      font-size: 22px;
+      font-weight: 760;
+      color: var(--fg-strong);
+      letter-spacing: -0.01em;
+    }
+    .source-panel-body {
+      padding: 18px 22px;
+    }
+    .source-intro {
+      font-size: 18px;
+      line-height: 1.34;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .source-intro strong {
+      color: var(--fg-strong);
+      font-weight: 760;
+    }
+    .source-logo-wall {
+      border-top: 1px dashed rgba(231, 90, 8, 0.38);
+      padding-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px 14px;
+      align-items: center;
+    }
+    .source-logo-cell {
+      min-height: 44px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 4px;
+    }
+    .source-logo-cell img {
+      max-width: 126px;
+      max-height: 38px;
+      object-fit: contain;
+      display: block;
+    }
+    .source-logo-cell.logo-wide img {
+      max-width: 140px;
+      max-height: 34px;
+    }
+    .source-logo-cell.logo-mark img {
+      max-width: 62px;
+      max-height: 40px;
+    }
+    .source-logo-cell.logo-medium img {
+      max-width: 110px;
+      max-height: 38px;
+    }
+    .coverage-panel {
+      border-color: rgba(231, 90, 8, 0.30);
+      background: linear-gradient(135deg, rgba(255, 246, 241, 0.78), rgba(255, 255, 255, 0.86));
+    }
+    .coverage-panel .source-panel-head {
+      color: var(--accent);
+      border-bottom-color: rgba(231, 90, 8, 0.24);
+    }
+    .coverage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .coverage-item {
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(231, 90, 8, 0.18);
+    }
+    .coverage-item:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+    .coverage-item .label {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .coverage-item strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1.12;
+      color: var(--fg-strong);
+      margin-bottom: 5px;
+    }
+    .coverage-item span {
+      display: block;
+      font-size: 14px;
+      line-height: 1.28;
+      color: var(--muted);
+    }
+    .s-sources {
+      padding-bottom: 68px;
+    }
+    .s-sources .slide-head {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+    }
 
     .shortlist-lens {
       position: absolute;
@@ -1730,8 +1849,8 @@
         <div class="slide-head">
           <div class="left">
             <div class="eyebrow">05 · Module · Search</div>
-            <h1 class="slide-title">搜索 Search<br>用自然语言找到复杂人才画像</h1>
-            <h2 class="slide-subtitle">使用者可如同和资深猎头沟通一般，自由描述招聘需求。</h2>
+            <h1 class="slide-title">Search<br>Find complex talent profiles with natural language</h1>
+            <h2 class="slide-subtitle">Describe hiring needs the way you would brief a senior recruiter.</h2>
           </div>
           <div class="right">M-01 · SEARCH</div>
         </div>
@@ -1753,7 +1872,7 @@
                 line-height:1.45;
                 font-weight:500;
               "
-            >我想找做过 LLM inference optimization 的工程师，最好有 CUDA、TensorRT 或 vLLM 经验。有开源作品更好。地点可以灵活，优先北美或远程。</div>
+            >I’m looking for an engineer who has worked on LLM inference optimization, ideally with CUDA, TensorRT, or vLLM experience. Open-source work is a plus. Location is flexible, with a preference for North America or remote.</div>
             <img
               src="product-images/product-search1.png"
               alt="DINQ Search refinement screenshot"
@@ -1794,7 +1913,7 @@
                 line-height:1.45;
                 font-weight:500;
               "
-            >帮我找 20 个做 AI agent infrastructure 的工程师，最好有开源贡献</div>
+            >Find me 20 engineers working on AI agent infrastructure, ideally with open-source contributions.</div>
           </div>
         </div>
         <div class="slide-foot">
@@ -2171,45 +2290,69 @@
       </section>
 
       <!-- ===== Slide 18 · 数据源 ===== -->
-      <section class="slide s-content grid-bg" data-screen-label="18 Data Sources">
+      <section class="slide s-content s-sources grid-bg" data-screen-label="18 Data Sources">
         <div class="slide-head">
           <div class="left">
-            <div class="eyebrow">06 · Data Sources</div>
-            <h1 class="slide-title">全渠道数据源<br>挖掘简历无法体现的技术实力</h1>
+            <div class="eyebrow">06 · Trust &amp; Traceability</div>
+            <h1 class="slide-title">DINQ 人才智能背后的<br>全渠道数据源</h1>
           </div>
-          <div class="right">6 CATEGORIES</div>
+          <div class="right">500+ SOURCES</div>
         </div>
         <div class="body">
-          <div class="source-grid">
-            <div class="source-item">
-              <div class="src-tag">SOURCE 01 · OPEN SOURCE</div>
-              <div class="src-name">开源代码平台（GitHub）</div>
-              <div class="src-desc">开发者账号、代码仓库、开发语言、技术标签、项目点赞 / 复刻 / 关注数据、开源协作记录、全部公开动态。</div>
+          <div class="source-vendor-layout">
+            <div class="source-panel">
+              <div class="source-panel-head">数据来源与证据链接</div>
+              <div class="source-panel-body">
+                <div class="source-intro">DINQ 从 <strong>公开职业、技术、学术、公司与社区信号</strong> 中生成候选人档案。每份档案都可回溯到来源级证据，让团队验证真实产出，而不是只依赖静态简历。</div>
+                <div class="source-logo-wall">
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-linkedin.png" alt="LinkedIn logo"></div>
+                  <div class="source-logo-cell logo-mark"><img src="../logos/source-x.png" alt="X logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-github.png" alt="GitHub logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-google-scholar.png" alt="Google Scholar logo"></div>
+                  <div class="source-logo-cell logo-mark"><img src="../logos/source-openreview.png" alt="OpenReview logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-crunchbase.png" alt="Crunchbase logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-arxiv.png" alt="arXiv logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-university-data.png" alt="University data logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-reddit.png" alt="Reddit logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-pubmed.png" alt="PubMed logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-product-hunt.png" alt="Product Hunt logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-openalex.png" alt="OpenAlex logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-cvpr.png" alt="CVPR logo"></div>
+                  <div class="source-logo-cell logo-mark"><img src="../logos/source-neurips.png" alt="NeurIPS logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-iccv.png" alt="ICCV logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-google-patents.png" alt="Google Patents logo"></div>
+                  <div class="source-logo-cell logo-wide"><img src="../logos/source-pitchbook.png" alt="PitchBook logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-huggingface.svg" alt="Hugging Face logo"></div>
+                  <div class="source-logo-cell logo-medium"><img src="../logos/source-kaggle.png" alt="Kaggle logo"></div>
+                </div>
+              </div>
             </div>
-            <div class="source-item">
-              <div class="src-tag">SOURCE 02 · AI MODELS</div>
-              <div class="src-name">AI 模型社区（Hugging Face）</div>
-              <div class="src-desc">个人 / 机构账号、自研模型、数据集、在线应用、技术标签、下载量、收藏、开发框架信息。</div>
-            </div>
-            <div class="source-item">
-              <div class="src-tag">SOURCE 03 · ACADEMIC</div>
-              <div class="src-name">学术渠道</div>
-              <div class="src-desc">论文、研究机构、研究领域、学者主页；覆盖谷歌学术、Semantic Scholar、ORCID、DBLP、OpenReview、OpenAlex。</div>
-            </div>
-            <div class="source-item">
-              <div class="src-tag">SOURCE 04 · PROFESSIONAL</div>
-              <div class="src-name">职业商业数据</div>
-              <div class="src-desc">完整从业履历、在职企业、岗位、教育背景、领英、Crunchbase 等职业平台公开资料。</div>
-            </div>
-            <div class="source-item">
-              <div class="src-tag">SOURCE 05 · OPEN WEB</div>
-              <div class="src-name">全网公开网页</div>
-              <div class="src-desc">个人职业主页、技术博客、各类可检索公开佐证材料。</div>
-            </div>
-            <div class="source-item">
-              <div class="src-tag">SOURCE 06 · USER SUBMIT</div>
-              <div class="src-name">用户自主提交数据</div>
-              <div class="src-desc">用户授权绑定账号、手动补充资料、DINQ 个人主页 Page 与作品集。</div>
+            <div class="source-panel coverage-panel">
+              <div class="source-panel-head">证据覆盖维度</div>
+              <div class="source-panel-body">
+                <div class="coverage-list">
+                  <div class="coverage-item">
+                    <div class="label">Professional Graph</div>
+                    <strong>职业、公司与投资背景</strong>
+                    <span>LinkedIn、Crunchbase、PitchBook、大学数据与公开公司记录，用于连接岗位、雇主、融资历史与组织网络。</span>
+                  </div>
+                  <div class="coverage-item">
+                    <div class="label">Technical Graph</div>
+                    <strong>代码、模型、项目与技术基准</strong>
+                    <span>GitHub、Hugging Face、Kaggle、Product Hunt、Google Patents 与开源项目页面，呈现候选人真实构建过的成果。</span>
+                  </div>
+                  <div class="coverage-item">
+                    <div class="label">Research Graph</div>
+                    <strong>论文、引用、会议与同行评审</strong>
+                    <span>Google Scholar、OpenReview、arXiv、PubMed、OpenAlex、CVPR、NeurIPS 与 ICCV，用于识别研究产出与技术深度。</span>
+                  </div>
+                  <div class="coverage-item">
+                    <div class="label">Community Graph</div>
+                    <strong>公开讨论与影响力分发信号</strong>
+                    <span>X、Reddit 与其他公开社区，为候选人的可见度、专业影响力与生态位置提供上下文。</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
