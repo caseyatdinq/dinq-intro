@@ -1587,6 +1587,30 @@
       text-align: center;
       line-height: 1.2;
     }
+    .source-more-cell {
+      min-height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--muted);
+    }
+    .source-more-cell .more-dots {
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .source-more-cell .more-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.35;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
     .coverage-panel {
       border-color: rgba(231, 90, 8, 0.30);
       background: linear-gradient(135deg, rgba(255, 246, 241, 0.78), rgba(255, 255, 255, 0.86));
@@ -1674,6 +1698,17 @@
     .s-sources .source-logo-cell.logo-medium img {
       max-width: 110px;
       max-height: 38px;
+    }
+    .s-sources .source-more-cell {
+      min-height: 44px;
+      gap: 10px;
+    }
+    .s-sources .source-more-cell .more-dots {
+      font-size: 30px;
+    }
+    .s-sources .source-more-cell .more-text {
+      font-size: 10px;
+      letter-spacing: 0.11em;
     }
     .s-sources .coverage-list {
       gap: 10px;
@@ -2841,6 +2876,7 @@
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-pitchbook.png" alt="PitchBook logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-huggingface.svg" alt="Hugging Face logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-kaggle.png" alt="Kaggle logo"></div>
+                  <div class="source-more-cell"><span class="more-dots">...</span><span class="more-text">More sources<br>coming soon</span></div>
                 </div>
               </div>
             </div>
