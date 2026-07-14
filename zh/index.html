@@ -939,11 +939,11 @@
       color: var(--fg);
     }
     .adopter-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 22px;
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
     }
     .adopter-card {
-      min-height: 330px;
+      min-height: 270px;
       border: 1px solid rgba(15, 23, 42, 0.10);
       border-radius: 18px;
       background: rgba(255, 255, 255, 0.58);
@@ -967,6 +967,10 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
     }
+    .adopter-logos.dense {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px 16px;
+    }
     .logo-tile {
       width: 100%;
       min-width: 0;
@@ -987,10 +991,242 @@
     }
     .logo-tile.logo-tall img { max-height: 62px; }
     .logo-tile.logo-wide img { max-width: 146px; max-height: 44px; }
+    .logo-tile.logo-superwide img { max-width: 190px; max-height: 52px; }
     .logo-tile.logo-small img { max-width: 74px; max-height: 44px; }
     .logo-tile.logo-text img { max-width: 118px; max-height: 38px; }
+    .logo-tile.logo-square img { max-width: 82px; max-height: 62px; }
+    .logo-tile.logo-crop-wide img { width: 148px; height: 54px; object-fit: cover; object-position: center; }
+    .logo-word {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--fg);
+      line-height: 1.05;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .adopter-logos.dense .logo-word { font-size: 17px; }
     .adopter-logos.three-up .logo-tile img { max-width: 96px; max-height: 42px; }
     .adopter-logos.three-up .logo-tile.logo-wide img { max-width: 106px; max-height: 40px; }
+    .s-adopters {
+      padding-top: 58px;
+      padding-bottom: 54px;
+    }
+    .s-adopters .slide-head {
+      padding-bottom: 20px;
+      margin-bottom: 26px;
+    }
+    .s-adopters h1.slide-title {
+      font-size: 58px;
+      line-height: 1.04;
+    }
+    .s-adopters h2.slide-subtitle {
+      font-size: 20px;
+      line-height: 1.42;
+      margin-top: 12px;
+    }
+    .s-adopters .adopter-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: 250px 188px;
+      grid-auto-flow: dense;
+      gap: 18px 20px;
+    }
+    .s-adopters .adopter-card {
+      min-height: 0;
+      padding: 22px 26px 18px;
+      gap: 12px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .s-adopters .adopter-card:nth-child(2) {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      padding: 24px 30px 24px;
+      gap: 14px;
+    }
+    .s-adopters .adopter-card:nth-child(3) {
+      grid-column: 2;
+      grid-row: 2;
+    }
+    .s-adopters .adopter-card:nth-child(4) {
+      grid-column: 3;
+      grid-row: 2;
+    }
+    .s-adopters .logo-cat-head {
+      font-size: 13px;
+      padding-bottom: 10px;
+    }
+    .s-adopters .adopter-list {
+      font-size: 14px;
+      line-height: 1.35;
+      min-height: 0;
+      display: none;
+    }
+    .s-adopters .adopter-logos {
+      gap: 8px 12px;
+    }
+    .s-adopters .adopter-card:nth-child(2) .adopter-logos {
+      margin-top: 12px;
+      align-content: center;
+      flex: 1;
+    }
+    .s-adopters .adopter-logos.dense {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 20px 30px;
+    }
+    .s-adopters .logo-tile {
+      height: 58px;
+      flex-direction: column;
+      gap: 6px;
+      overflow: visible;
+    }
+    .s-adopters .logo-tile img {
+      max-width: 124px;
+      max-height: 42px;
+    }
+    .s-adopters .logo-tile.logo-square img {
+      max-width: 66px;
+      max-height: 46px;
+    }
+    .s-adopters .adopter-logos.three-up .logo-tile.logo-zhipu img {
+      max-width: 74px;
+      max-height: 52px;
+    }
+    .s-adopters .logo-tile.logo-wide img {
+      max-width: 140px;
+      max-height: 40px;
+    }
+    .s-adopters .logo-tile.logo-crop-wide img {
+      width: 132px;
+      height: 44px;
+    }
+    .s-adopters .logo-word {
+      font-size: 16px;
+    }
+    .s-adopters .logo-label {
+      font-size: 10px;
+      line-height: 1.15;
+      color: var(--muted);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .s-adopters .adopter-note {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 10px;
+      line-height: 1.5;
+      letter-spacing: 0.11em;
+      color: var(--muted-soft);
+    }
+    .s-adopters-enterprise .adopter-grid { display: block; }
+    .s-adopters-enterprise .adopter-card {
+      min-height: 500px;
+      padding: 34px 46px 38px;
+      gap: 20px;
+    }
+    .s-adopters-enterprise .adopter-logos.dense {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 42px 56px;
+      margin-top: 42px;
+    }
+    .s-adopters-enterprise .logo-tile {
+      height: 154px;
+      gap: 14px;
+      justify-content: flex-end;
+    }
+    .s-adopters-enterprise .logo-art {
+      height: 114px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 114px;
+    }
+    .s-adopters-enterprise .logo-tile img {
+      max-width: 290px;
+      max-height: 110px;
+    }
+    .s-adopters-enterprise .logo-tile.logo-square img {
+      max-width: 142px;
+      max-height: 112px;
+    }
+    .s-adopters-enterprise .logo-tile.logo-wide img {
+      max-width: 310px;
+      max-height: 98px;
+    }
+    .s-adopters-enterprise .logo-label {
+      font-size: 19px;
+      font-weight: 700;
+    }
+    .s-adopters-more .adopter-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: 510px;
+      gap: 22px;
+    }
+    .s-adopters-more .adopter-card,
+    .s-adopters-more .adopter-card:nth-child(2),
+    .s-adopters-more .adopter-card:nth-child(3),
+    .s-adopters-more .adopter-card:nth-child(4) {
+      grid-column: auto;
+      grid-row: auto;
+      padding: 32px 38px 36px;
+      gap: 16px;
+    }
+    .s-adopters-more .adopter-logos {
+      margin-top: 36px;
+      flex: 1;
+      align-content: center;
+      gap: 34px 28px;
+    }
+    .s-adopters-more .adopter-logos.three-up {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .s-adopters-more .logo-tile {
+      height: 154px;
+      gap: 14px;
+    }
+    .s-adopters-more .logo-tile img {
+      max-width: 245px;
+      max-height: 112px;
+    }
+    .s-adopters-more .logo-tile.logo-square img {
+      max-width: 138px;
+      max-height: 114px;
+    }
+    .s-adopters-more .logo-tile.logo-zhipu img {
+      width: 120px;
+      height: 120px;
+      max-width: 120px;
+      max-height: 120px;
+      object-fit: contain;
+    }
+    .s-adopters-more .logo-tile.logo-crop-wide img {
+      width: 245px;
+      height: 86px;
+    }
+    .s-adopters-more .logo-label {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile {
+      height: 166px;
+      justify-content: flex-start;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile.logo-square img,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile.logo-zhipu img {
+      width: 120px;
+      height: 120px;
+      max-width: 120px;
+      max-height: 120px;
+      object-fit: contain;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile.logo-zhipu img {
+      object-fit: cover;
+      border-radius: 24px;
+    }
     .endorse-logo-grid {
       display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 14px;
@@ -1582,62 +1818,87 @@
         </div>
       </section>
 
-      <!-- ===== Slide 06 · 平台落地 ===== -->
-      <section class="slide s-content grid-bg" data-screen-label="06 Early Adopters">
+      <!-- ===== Slide 06 · 平台落地：企业科技 ===== -->
+      <section class="slide s-content s-adopters s-adopters-enterprise grid-bg" data-screen-label="06 Early Adopters Enterprise">
         <div class="slide-head">
           <div class="left">
             <div class="eyebrow">02 · Early Adopters</div>
-            <h1 class="slide-title">平台落地<br>各行业头部机构已率先试用</h1>
-            <h2 class="slide-subtitle">目前已有 AI 科研企业、实业公司、投资机构、海外团队、专业猎头平台使用、体验 DINQ。</h2>
+            <h1 class="slide-title">平台落地<br>企业与科技团队</h1>
           </div>
-          <div class="right">EARLY USERS</div>
+          <div class="right">ENTERPRISE / TECH</div>
         </div>
         <div class="body">
           <div class="adopter-grid">
             <div class="adopter-card">
-              <div class="logo-cat-head">AI 科研机构 · AI Research</div>
-              <div class="adopter-list">智谱华章 · Synapse AI<br>EDGE Agentic Labs · KoreTech</div>
-              <div class="adopter-logos three-up">
-                <div class="logo-tile"><img src="../logos/logo-zhipu.png" alt="Zhipu AI logo"></div>
-                <div class="logo-tile"><img src="../logos/logo-edge.jpeg" alt="EDGE Agentic Labs logo"></div>
-                <div class="logo-tile logo-wide"><img src="../logos/logo-damo-header.svg" alt="KoreTech logo"></div>
-              </div>
-            </div>
-            <div class="adopter-card">
-              <div class="logo-cat-head">国内企业 · Enterprise</div>
-              <div class="adopter-list">蚂蚁集团 · 字节跳动<br>腾讯 · 京东</div>
-              <div class="adopter-logos">
-                <div class="logo-tile logo-wide"><img src="../logos/logo-antgroup.jpeg" alt="Ant Group logo"></div>
-                <div class="logo-tile logo-wide"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></div>
-                <div class="logo-tile logo-wide"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></div>
-                <div class="logo-tile logo-text"><img src="../logos/logo-jd.svg" alt="JD.com logo"></div>
-              </div>
-            </div>
-            <div class="adopter-card">
-              <div class="logo-cat-head">创投基金 · Venture Capital</div>
-              <div class="adopter-list">顺为资本 · 清新资本<br>NYX Ventures</div>
-              <div class="adopter-logos">
-                <div class="logo-tile logo-tall"><img src="../logos/logo-shunwei.png" alt="Shunwei Capital logo"></div>
-                <div class="logo-tile"><img src="../logos/logo-nyx.jpeg" alt="NYX Ventures logo"></div>
-              </div>
-            </div>
-            <div class="adopter-card">
-              <div class="logo-cat-head">海外团队 &amp; 猎头 · Overseas</div>
-              <div class="adopter-list">SPM · Agrícola Campolor<br>Vivende Inmobiliaria</div>
-              <div class="adopter-logos three-up">
-                <div class="logo-tile"><img src="../logos/logo-spm.jpeg" alt="SPM Agency logo"></div>
-                <div class="logo-tile logo-wide"><img src="../logos/logo-campolor.webp" alt="Agricola Campolor logo"></div>
-                <div class="logo-tile"><img src="../logos/logo-vivende.png" alt="Vivende Inmobiliaria logo"></div>
+              <div class="logo-cat-head">企业 / 科技</div>
+              <div class="adopter-list">字节跳动 · 京东 · 博世 · 冬海集团 · 客路旅行 · XREAL · 腾讯 · 蚂蚁集团</div>
+              <div class="adopter-logos dense">
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></span><span class="logo-label">字节跳动</span></div>
+                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-jdcom.jpeg" alt="JD.com logo"></span><span class="logo-label">京东</span></div>
+                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-bosch.jpeg" alt="Bosch logo"></span><span class="logo-label">博世</span></div>
+                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-sea-group.jpeg" alt="Sea Group logo"></span><span class="logo-label">冬海集团</span></div>
+                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-klook.jpeg" alt="Klook logo"></span><span class="logo-label">客路旅行</span></div>
+                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-xreal.jpeg" alt="XREAL logo"></span><span class="logo-label">XREAL</span></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></span><span class="logo-label">腾讯</span></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-antgroup.jpeg" alt="Ant Group logo"></span><span class="logo-label">蚂蚁集团</span></div>
               </div>
             </div>
           </div>
-          <div style="margin-top: 24px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--muted-soft); padding: 14px 0 0; border-top: 1px solid var(--border);">
-            合规声明：所列机构仅为平台注册、试用用户所属企业示例，不构成官方合作、客户签约、品牌背书。
+          <div class="adopter-note">
+            合规声明：所列机构为平台注册用户或签约客户所属机构示例，仅用于说明平台使用场景，不代表任何品牌背书、公开推荐或官方合作关系。
           </div>
         </div>
         <div class="slide-foot">
           <div class="brand"><span class="dot"></span>DINQ</div>
           <div>06 · EARLY ADOPTERS</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 06B · 平台落地：更多机构 ===== -->
+      <section class="slide s-content s-adopters s-adopters-more grid-bg" data-screen-label="06B Early Adopters More">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">02 · Early Adopters</div>
+            <h1 class="slide-title">平台落地<br>科研、投资与专业寻访机构</h1>
+          </div>
+          <div class="right">RESEARCH / CAPITAL / SEARCH</div>
+        </div>
+        <div class="body">
+          <div class="adopter-grid">
+            <div class="adopter-card">
+              <div class="logo-cat-head">专业招聘 / 高端寻访</div>
+              <div class="adopter-list">华世先达 · TL Talent Advisors</div>
+              <div class="adopter-logos">
+                <div class="logo-tile logo-square"><img src="../logos/logo-huntsor-international.jpeg" alt="Huntsor International logo"><span class="logo-label">华世先达</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-tl-talent-advisors.jpeg" alt="TL Talent Advisors logo"><span class="logo-label">TL Talent Advisors</span></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">AI / 科研 / 学术</div>
+              <div class="adopter-list">Google DeepMind · 西湖大学 · 智谱AI</div>
+              <div class="adopter-logos three-up">
+                <div class="logo-tile logo-square"><img src="../logos/logo-google-deepmind.jpeg" alt="Google DeepMind logo"><span class="logo-label">Google DeepMind</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-westlake-university.jpeg" alt="Westlake University logo"><span class="logo-label">西湖大学</span></div>
+                <div class="logo-tile logo-square logo-zhipu"><img src="../logos/logo-zhipu.jpeg" alt="Zhipu AI logo"><span class="logo-label">智谱AI</span></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">投资 / 创投</div>
+              <div class="adopter-list">YZi Labs · 华兴资本 · 顺为资本</div>
+              <div class="adopter-logos">
+                <div class="logo-tile logo-square"><img src="../logos/logo-yzi-labs.jpeg" alt="YZi Labs logo"><span class="logo-label">YZi Labs</span></div>
+                <div class="logo-tile logo-crop-wide"><img src="../logos/logo-china-renaissance.jpeg" alt="China Renaissance logo"><span class="logo-label">华兴资本</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-shunwei-capital.jpeg" alt="Shunwei Capital logo"><span class="logo-label">顺为资本</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="adopter-note">
+            合规声明：所列机构为平台注册用户或签约客户所属机构示例，仅用于说明平台使用场景，不代表任何品牌背书、公开推荐或官方合作关系。
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>06B · EARLY ADOPTERS</div>
         </div>
       </section>
 
@@ -2625,7 +2886,7 @@
               <div style="font-size: 14px; line-height: 1.55; color: var(--muted); margin-bottom: 12px;">DINQ 面向全球发布 AI 原生职业人才平台官方新闻通稿，覆盖北美及全球财经、科技主流媒体分发渠道：</div>
               <div style="font-size: 16px; line-height: 2; color: var(--fg);">雅虎财经 · 美联社 · MarketWatch · 环球邮报 · TradingView · EQS 资讯 · Digital Journal · 国际商业时报</div>
               <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);">
-                <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--muted-soft);">合规提示：所列机构仅为平台注册、试用用户所属企业示例，不构成官方合作、客户签约、品牌背书。</div>
+                <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--muted-soft);">合规提示：所列机构为平台注册用户或签约客户所属机构示例，仅用于说明平台使用场景，不代表任何品牌背书、公开推荐或官方合作关系。</div>
               </div>
             </div>
           </div>
