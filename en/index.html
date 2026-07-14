@@ -1329,11 +1329,11 @@
       color: var(--fg);
     }
     .adopter-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 22px;
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
     }
     .adopter-card {
-      min-height: 330px;
+      min-height: 270px;
       border: 1px solid rgba(15, 23, 42, 0.10);
       border-radius: 18px;
       background: rgba(255, 255, 255, 0.58);
@@ -1357,6 +1357,10 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
     }
+    .adopter-logos.dense {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px 16px;
+    }
     .logo-tile {
       width: 100%;
       min-width: 0;
@@ -1377,10 +1381,29 @@
     }
     .logo-tile.logo-tall img { max-height: 62px; }
     .logo-tile.logo-wide img { max-width: 146px; max-height: 44px; }
+    .logo-tile.logo-superwide img { max-width: 190px; max-height: 52px; }
     .logo-tile.logo-small img { max-width: 74px; max-height: 44px; }
     .logo-tile.logo-text img { max-width: 118px; max-height: 38px; }
+    .logo-tile.logo-square img { max-width: 82px; max-height: 62px; }
+    .logo-tile.logo-crop-wide img { width: 148px; height: 54px; object-fit: cover; object-position: center; }
+    .logo-word {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--fg);
+      line-height: 1.05;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .adopter-logos.dense .logo-word { font-size: 17px; }
     .adopter-logos.three-up .logo-tile img { max-width: 96px; max-height: 42px; }
     .adopter-logos.three-up .logo-tile.logo-wide img { max-width: 106px; max-height: 40px; }
+    .adopter-logos.three-up .logo-tile.logo-zhipu img {
+      width: 62px;
+      height: 62px;
+      max-width: 62px;
+      max-height: 62px;
+      object-fit: contain;
+    }
 
     .s-adopters h2.slide-subtitle,
     .s-sources h2.slide-subtitle,
@@ -1401,13 +1424,144 @@
       padding-bottom: 18px;
     }
     .s-adopters .adopter-card {
-      min-height: 350px;
-      padding: 30px 24px 26px;
+      min-height: 270px;
+      padding: 24px 24px 22px;
     }
     .s-adopters .body > div[style*="font-size: 11px"] {
       font-size: 13px !important;
       line-height: 1.45 !important;
       letter-spacing: 0.1em !important;
+    }
+    .s-adopters .adopter-note {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 10px;
+      line-height: 1.5;
+      letter-spacing: 0.11em;
+      color: var(--muted-soft);
+    }
+    .s-adopters-enterprise .adopter-grid {
+      display: block;
+    }
+    .s-adopters-enterprise .adopter-card {
+      min-height: 500px;
+      padding: 34px 46px 38px;
+      gap: 20px;
+    }
+    .s-adopters-enterprise .adopter-logos.dense {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 42px 56px;
+      margin-top: 42px;
+      align-content: center;
+    }
+    .s-adopters-enterprise .logo-tile {
+      height: 154px;
+      overflow: visible;
+      flex-direction: column;
+      gap: 14px;
+      justify-content: flex-end;
+    }
+    .s-adopters-enterprise .logo-art {
+      height: 114px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      flex: 0 0 114px;
+    }
+    .s-adopters-enterprise .logo-tile img {
+      max-width: 290px;
+      max-height: 110px;
+    }
+    .s-adopters-enterprise .logo-tile.logo-square img {
+      max-width: 142px;
+      max-height: 112px;
+    }
+    .s-adopters-enterprise .logo-tile.logo-wide img {
+      max-width: 310px;
+      max-height: 98px;
+    }
+    .s-adopters-enterprise .logo-label,
+    .s-adopters-more .logo-label {
+      font-size: 19px;
+      line-height: 1.15;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+      white-space: normal;
+    }
+    .s-adopters-more .adopter-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: 510px;
+      gap: 22px;
+    }
+    .s-adopters-more .adopter-card {
+      min-height: 0;
+      padding: 32px 38px 36px;
+      gap: 16px;
+    }
+    .s-adopters-more .adopter-logos {
+      margin-top: 36px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 34px 28px;
+      align-content: center;
+      flex: 1;
+    }
+    .s-adopters-more .adopter-logos.three-up {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .s-adopters-more .logo-tile {
+      height: 154px;
+      overflow: visible;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .s-adopters-more .logo-art {
+      height: 114px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+    .s-adopters-more .logo-tile img {
+      max-width: 245px;
+      max-height: 112px;
+    }
+    .s-adopters-more .logo-tile.logo-square img {
+      max-width: 138px;
+      max-height: 114px;
+    }
+    .s-adopters-more .logo-tile.logo-zhipu img {
+      width: 120px;
+      height: 120px;
+      max-width: 120px;
+      max-height: 120px;
+      object-fit: contain;
+    }
+    .s-adopters-more .logo-tile.logo-crop-wide img {
+      width: 245px;
+      height: 86px;
+      object-fit: cover;
+      object-position: center;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile {
+      height: 166px;
+      justify-content: flex-start;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile.logo-square img,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile.logo-zhipu img {
+      width: 120px;
+      height: 120px;
+      max-width: 120px;
+      max-height: 120px;
+      object-fit: contain;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile.logo-zhipu img {
+      object-fit: cover;
+      border-radius: 24px;
     }
     .s-sources .source-grid {
       gap: 34px 64px;
@@ -2111,62 +2265,87 @@
         </div>
       </section>
 
-      <!-- ===== Slide 06 · Early Adopters ===== -->
-      <section class="slide s-content s-adopters grid-bg" data-screen-label="06 Early Adopters">
+      <!-- ===== Slide 06 · Early Adopters: Enterprise / Technology ===== -->
+      <section class="slide s-content s-adopters s-adopters-enterprise grid-bg" data-screen-label="06 Early Adopters Enterprise">
         <div class="slide-head">
           <div class="left">
             <div class="eyebrow">02 · Adoption across industries</div>
             <h1 class="slide-title">Adoption across industries</h1>
-            <h2 class="slide-subtitle">AI labs, enterprises, investors, global teams, and specialist recruiting organizations use DINQ when <span class="copy-highlight">conventional sourcing does not surface the right people fast enough</span>.</h2>
           </div>
-          <div class="right">EARLY USERS</div>
+          <div class="right">ENTERPRISE / TECH</div>
         </div>
         <div class="body">
           <div class="adopter-grid">
             <div class="adopter-card">
-              <div class="logo-cat-head">AI Research</div>
-              <div class="adopter-list">Zhipu AI · Synapse AI<br>EDGE Agentic Labs · KoreTech</div>
-              <div class="adopter-logos three-up">
-                <div class="logo-tile"><img src="../logos/logo-zhipu.png" alt="Zhipu AI logo"></div>
-                <div class="logo-tile"><img src="../logos/logo-edge.jpeg" alt="EDGE Agentic Labs logo"></div>
-                <div class="logo-tile logo-wide"><img src="../logos/logo-damo-header.svg" alt="KoreTech logo"></div>
-              </div>
-            </div>
-            <div class="adopter-card">
-              <div class="logo-cat-head">Enterprise</div>
-              <div class="adopter-list">Ant Group · ByteDance<br>Tencent · JD.com</div>
-              <div class="adopter-logos">
-                <div class="logo-tile logo-wide"><img src="../logos/logo-antgroup.jpeg" alt="Ant Group logo"></div>
-                <div class="logo-tile logo-wide"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></div>
-                <div class="logo-tile logo-wide"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></div>
-                <div class="logo-tile logo-text"><img src="../logos/logo-jd.svg" alt="JD.com logo"></div>
-              </div>
-            </div>
-            <div class="adopter-card">
-              <div class="logo-cat-head">Venture Capital</div>
-              <div class="adopter-list">Shunwei Capital · Fresh Capital<br>NYX Ventures</div>
-              <div class="adopter-logos">
-                <div class="logo-tile logo-tall"><img src="../logos/logo-shunwei.png" alt="Shunwei Capital logo"></div>
-                <div class="logo-tile"><img src="../logos/logo-nyx.jpeg" alt="NYX Ventures logo"></div>
-              </div>
-            </div>
-            <div class="adopter-card">
-              <div class="logo-cat-head">Global Teams &amp; Agencies</div>
-              <div class="adopter-list">SPM · Agrícola Campolor<br>Vivende Inmobiliaria</div>
-              <div class="adopter-logos three-up">
-                <div class="logo-tile"><img src="../logos/logo-spm.jpeg" alt="SPM Agency logo"></div>
-                <div class="logo-tile logo-wide"><img src="../logos/logo-campolor.webp" alt="Agricola Campolor logo"></div>
-                <div class="logo-tile"><img src="../logos/logo-vivende.png" alt="Vivende Inmobiliaria logo"></div>
+              <div class="logo-cat-head">Corporate / Technology</div>
+              <div class="adopter-list">ByteDance · JD.com · BOSCH · Sea Group · Klook · XREAL · Tencent · ANT Group</div>
+              <div class="adopter-logos dense">
+                <div class="logo-tile logo-wide"><div class="logo-art"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></div><div class="logo-label">ByteDance</div></div>
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-jdcom.jpeg" alt="JD.com logo"></div><div class="logo-label">JD.com</div></div>
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-bosch.jpeg" alt="BOSCH logo"></div><div class="logo-label">BOSCH</div></div>
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-sea-group.jpeg" alt="Sea Group logo"></div><div class="logo-label">Sea Group</div></div>
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-klook.jpeg" alt="Klook logo"></div><div class="logo-label">Klook</div></div>
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-xreal.jpeg" alt="XREAL logo"></div><div class="logo-label">XREAL</div></div>
+                <div class="logo-tile logo-wide"><div class="logo-art"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></div><div class="logo-label">Tencent</div></div>
+                <div class="logo-tile logo-wide"><div class="logo-art"><img src="../logos/logo-antgroup.jpeg" alt="ANT Group logo"></div><div class="logo-label">ANT Group</div></div>
               </div>
             </div>
           </div>
-          <div style="margin-top: 24px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--muted-soft); padding: 14px 0 0; border-top: 1px solid var(--border);">
-            Compliance note: listed organizations are examples of companies associated with registered or trial users. They do not imply official partnership, customer contract, or brand endorsement.
+          <div class="adopter-note">
+            Compliance note: listed organizations are examples associated with registered platform users or contracted customers. Inclusion is for usage context only and does not imply brand endorsement, public recommendation, or official partnership.
           </div>
         </div>
         <div class="slide-foot">
           <div class="brand"><span class="dot"></span>DINQ</div>
           <div>06 · ADOPTION ACROSS INDUSTRIES</div>
+        </div>
+      </section>
+
+      <!-- ===== Slide 06B · Early Adopters: Research / Capital / Search ===== -->
+      <section class="slide s-content s-adopters s-adopters-more grid-bg" data-screen-label="06B Early Adopters More">
+        <div class="slide-head">
+          <div class="left">
+            <div class="eyebrow">02 · Adoption across industries</div>
+            <h1 class="slide-title">Adoption across research, capital, and search</h1>
+          </div>
+          <div class="right">RESEARCH / CAPITAL / SEARCH</div>
+        </div>
+        <div class="body">
+          <div class="adopter-grid">
+            <div class="adopter-card">
+              <div class="logo-cat-head">Specialist Recruiting / Executive Search</div>
+              <div class="adopter-list">Huntsor International · TL Talent Advisors</div>
+              <div class="adopter-logos">
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-huntsor-international.jpeg" alt="Huntsor International logo"></div><div class="logo-label">Huntsor International</div></div>
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-tl-talent-advisors.jpeg" alt="TL Talent Advisors logo"></div><div class="logo-label">TL Talent Advisors</div></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">AI / Research / Academics</div>
+              <div class="adopter-list">Google DeepMind · Westlake University · Zhipu AI</div>
+              <div class="adopter-logos three-up">
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-google-deepmind.jpeg" alt="Google DeepMind logo"></div><div class="logo-label">Google DeepMind</div></div>
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-westlake-university.jpeg" alt="Westlake University logo"></div><div class="logo-label">Westlake University</div></div>
+                <div class="logo-tile logo-square logo-zhipu"><div class="logo-art"><img src="../logos/logo-zhipu.jpeg" alt="Zhipu AI logo"></div><div class="logo-label">Zhipu AI</div></div>
+              </div>
+            </div>
+            <div class="adopter-card">
+              <div class="logo-cat-head">Investment / Venture Capital</div>
+              <div class="adopter-list">YZi Labs · China Renaissance · Shunwei Capital</div>
+              <div class="adopter-logos three-up">
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-yzi-labs.jpeg" alt="YZi Labs logo"></div><div class="logo-label">YZi Labs</div></div>
+                <div class="logo-tile logo-crop-wide"><div class="logo-art"><img src="../logos/logo-china-renaissance.jpeg" alt="China Renaissance logo"></div><div class="logo-label">China Renaissance</div></div>
+                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-shunwei-capital.jpeg" alt="Shunwei Capital logo"></div><div class="logo-label">Shunwei Capital</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="adopter-note">
+            Compliance note: listed organizations are examples associated with registered platform users or contracted customers. Inclusion is for usage context only and does not imply brand endorsement, public recommendation, or official partnership.
+          </div>
+        </div>
+        <div class="slide-foot">
+          <div class="brand"><span class="dot"></span>DINQ</div>
+          <div>06B · EARLY ADOPTERS</div>
         </div>
       </section>
 
@@ -3126,7 +3305,7 @@
               <div style="font-size: 16px; line-height: 1.5; color: var(--muted); margin-bottom: 14px;">DINQ has distributed official news through North American and global business and technology media channels.</div>
               <div style="font-size: 20px; line-height: 1.8; color: var(--fg);">Yahoo Finance · Associated Press · MarketWatch · The Globe and Mail · TradingView · EQS News · Digital Journal · International Business Times</div>
               <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);">
-                <div style="font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.1em; line-height:1.45; color: var(--muted-soft);">Compliance note: listed organizations are examples of companies associated with registered or trial users. They do not imply official partnership, customer contract, or brand endorsement.</div>
+                <div style="font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.1em; line-height:1.45; color: var(--muted-soft);">Compliance note: listed organizations are examples associated with registered platform users or contracted customers. Inclusion is for usage context only and does not imply brand endorsement, public recommendation, or official partnership.</div>
               </div>
             </div>
           </div>
