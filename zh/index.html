@@ -91,6 +91,41 @@
       .slide { display: flex !important; position: relative !important; inset: auto !important; width: 1920px !important; height: 1080px !important; min-height: 1080px !important; flex-basis: auto !important; margin: 0 !important; box-shadow: none !important; page-break-before: auto; page-break-after: auto; break-before: auto; break-after: auto; break-inside: avoid; }
       .slide + .slide { page-break-before: always; break-before: page; }
       .deck-counter, .deck-hint { display: none !important; }
+
+      /* Keep the core-solution cards compatible with Quartz / iOS PDFKit.
+         Chrome otherwise exports the translucent shadows as large soft masks,
+         which Apple PDF renderers can expose as rectangular tiles. */
+      .s-core-solution .upgrade-item {
+        background: #fff !important;
+        border-color: #e2e3e5 !important;
+        box-shadow: none !important;
+      }
+      .s-core-solution .upgrade-item::before {
+        background: linear-gradient(90deg, #e75a08 0%, #f19b69 58%, #fbe6da 100%) !important;
+      }
+      .s-core-solution .upg-num,
+      .s-core-solution .upg-divider::after {
+        background: #fdf3ed !important;
+        border-color: #f7d9c8 !important;
+        box-shadow: none !important;
+      }
+      .s-core-solution .upg-before {
+        background: #f8f9fb !important;
+        border-color: #ecedef !important;
+        text-decoration-color: #d8dade !important;
+      }
+      .s-core-solution .upg-after {
+        background: linear-gradient(135deg, #fff6f1, #fff) !important;
+        border-color: #f9d7c4 !important;
+        box-shadow: none !important;
+      }
+      .s-core-solution .upg-mini span {
+        background: #fff !important;
+        border-color: #e8e9eb !important;
+      }
+      .s-core-solution .upg-mini i {
+        background: #f1c5ad !important;
+      }
     }
     @media (prefers-reduced-motion: reduce) {
       .deck-counter button { transition: none !important; }
@@ -2048,7 +2083,7 @@
       </section>
 
       <!-- ===== Slide 08 · DINQ 核心解决 ===== -->
-      <section class="slide s-content grid-bg" data-screen-label="08 Core Solution">
+      <section class="slide s-content grid-bg s-core-solution" data-screen-label="08 Core Solution">
         <div class="slide-head">
           <div class="left">
             <div class="eyebrow">04 · Core Solution</div>
