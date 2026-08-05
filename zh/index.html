@@ -1239,9 +1239,26 @@
       margin-top: 18px;
       gap: 14px 28px;
     }
-    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile {
-      height: 150px;
-      justify-content: center;
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(3) .adopter-logos.two-by-two .logo-tile {
+      height: 154px;
+      display: grid;
+      grid-template-rows: 116px auto;
+      align-content: center;
+      align-items: center;
+      justify-items: center;
+      gap: 14px;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile img,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(3) .adopter-logos.two-by-two .logo-tile img {
+      grid-row: 1;
+      align-self: center;
+      justify-self: center;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-label,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(3) .adopter-logos.two-by-two .logo-label {
+      grid-row: 2;
+      align-self: center;
     }
     .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile.logo-square img,
     .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile.logo-zhipu img {
@@ -1662,7 +1679,7 @@
           <div class="cover-main">
             <div class="cover-eyebrow">DINQ · Talent Search Platform</div>
             <h1 class="cover-title">全行业人才精准挖掘<br>DINQ <span class="accent">一搜即得</span></h1>
-            <div class="cover-sub">从真实作品中发现关键人才</div>
+            <div class="cover-sub">从真实贡献中发现关键人才</div>
           </div>
           <div class="cover-foot">
             <div class="cover-tagline">DINQ 不是简历数据库，也非通用网页检索——而是一套 AI 原生人才智能搜索引擎。不限赛道、不限地域，全行业高端人才一搜即得。</div>
@@ -1960,7 +1977,7 @@
             <div class="adopter-card">
               <div class="logo-cat-head">投资 / 学术</div>
               <div class="adopter-list">YZi Labs · 华兴资本 · 顺为资本 · 西湖大学</div>
-              <div class="adopter-logos">
+              <div class="adopter-logos two-by-two">
                 <div class="logo-tile logo-square"><img src="../logos/logo-yzi-labs.jpeg" alt="YZi Labs logo"><span class="logo-label">YZi Labs</span></div>
                 <div class="logo-tile logo-crop-wide"><img src="../logos/logo-china-renaissance.jpeg" alt="China Renaissance logo"><span class="logo-label">华兴资本</span></div>
                 <div class="logo-tile logo-square"><img src="../logos/logo-shunwei-capital.jpeg" alt="Shunwei Capital logo"><span class="logo-label">顺为资本</span></div>
