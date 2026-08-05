@@ -100,7 +100,7 @@
       .sticker-row *, .logo-sticker { transition: none !important; animation: none !important; }
       .slide { animation: none !important; }
     }
-  </style>
+</style>
   <style>
     /* ===== Per-deck styles ===== */
     .slide {
@@ -1513,6 +1513,10 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 18px;
     }
+    .s-adopters-more .adopter-logos.five-up {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
     .s-adopters-more .adopter-logos.investment-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px 30px;
@@ -1556,21 +1560,74 @@
       object-fit: cover;
       object-position: center;
     }
-    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile {
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.three-up .logo-tile {
       height: 166px;
       justify-content: flex-start;
     }
-    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile.logo-square img,
-    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile.logo-zhipu img {
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.three-up .logo-tile.logo-square img,
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.three-up .logo-tile.logo-zhipu img {
       width: 120px;
       height: 120px;
       max-width: 120px;
       max-height: 120px;
       object-fit: contain;
     }
-    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.three-up .logo-tile.logo-zhipu img {
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.three-up .logo-tile.logo-zhipu img {
       object-fit: cover;
       border-radius: 24px;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.five-up {
+      margin-top: 30px;
+      align-content: center;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.five-up .logo-tile {
+      height: 150px;
+      justify-content: flex-start;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.five-up .logo-art {
+      height: 106px;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.five-up .logo-tile.logo-square img,
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.five-up .logo-tile.logo-zhipu img {
+      width: 104px;
+      height: 104px;
+      max-width: 104px;
+      max-height: 104px;
+      object-fit: contain;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.five-up .logo-tile.logo-zhipu img {
+      object-fit: cover;
+      border-radius: 22px;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.ai-two-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-content: center;
+      gap: 12px 34px;
+      margin-top: 22px;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.ai-two-row .logo-tile {
+      flex: 0 0 28%;
+      height: 104px;
+      justify-content: center;
+      gap: 8px;
+      overflow: visible;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.ai-two-row .logo-art {
+      height: 78px;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.ai-two-row .logo-tile.logo-square img,
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.ai-two-row .logo-tile.logo-zhipu img {
+      width: 78px;
+      height: 78px;
+      max-width: 78px;
+      max-height: 78px;
+      object-fit: contain;
+    }
+    .s-adopters.s-adopters-more .adopter-card.ai-card .adopter-logos.ai-two-row .logo-tile.logo-zhipu img {
+      object-fit: cover;
+      border-radius: 17px;
     }
     .s-sources .source-grid {
       gap: 34px 64px;
@@ -2025,7 +2082,221 @@
       white-space: nowrap;
     }
 
-  </style>
+
+    /* ==== English logo parity with the finalized Chinese deck ==== */
+    .s-adopters-enterprise .adopter-logos.dense {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 60px 56px;
+      margin-top: 42px;
+      align-content: center;
+    }
+    .s-adopters-enterprise .logo-tile {
+      height: 154px;
+      gap: 14px;
+      justify-content: flex-end;
+    }
+    .s-adopters-enterprise .logo-art {
+      width: 100%;
+      height: 114px;
+      flex: 0 0 114px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .s-adopters-enterprise .logo-tile.logo-wide img {
+      max-width: 310px;
+      max-height: 98px;
+    }
+    .s-adopters-enterprise .logo-tile.logo-klook img {
+      width: 300px;
+      height: auto;
+      max-width: 300px;
+      max-height: 90px;
+    }
+    .s-adopters-enterprise .logo-tile.logo-tencent-en img {
+      width: 300px;
+      height: auto;
+      max-width: 300px;
+      max-height: 96px;
+    }
+    .s-adopters-enterprise .logo-label,
+    .s-adopters-more .logo-label {
+      font-size: 18px;
+      line-height: 1.15;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .s-adopters-more .adopter-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: 560px;
+      gap: 22px;
+    }
+    .s-adopters-more .adopter-card,
+    .s-adopters-more .adopter-card:nth-child(2),
+    .s-adopters-more .adopter-card:nth-child(3),
+    .s-adopters-more .adopter-card:nth-child(4) {
+      grid-column: auto;
+      grid-row: auto;
+      min-height: 0;
+      padding: 32px 38px 36px;
+      gap: 16px;
+    }
+    .s-adopters-more .logo-cat-head {
+      min-height: 60px;
+      box-sizing: border-box;
+    }
+    .s-adopters-more .adopter-list {
+      min-height: 50px;
+    }
+    .s-adopters-more .adopter-logos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 36px;
+      flex: 1;
+      align-content: center;
+      gap: 34px 28px;
+    }
+    .s-adopters-more .logo-tile {
+      height: 154px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      overflow: visible;
+    }
+    .s-adopters-more .logo-tile img {
+      max-width: 245px;
+      max-height: 112px;
+      object-fit: contain;
+    }
+    .s-adopters-more .logo-tile.logo-square img {
+      max-width: 138px;
+      max-height: 114px;
+    }
+    .s-adopters-more .adopter-logos.two-by-two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+      gap: 14px 28px;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(3) .adopter-logos.two-by-two .logo-tile {
+      height: 146px;
+      display: grid;
+      grid-template-rows: 108px auto;
+      align-content: center;
+      align-items: center;
+      justify-items: center;
+      gap: 10px;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile img,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(3) .adopter-logos.two-by-two .logo-tile img {
+      grid-row: 1;
+      align-self: center;
+      justify-self: center;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-label,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(3) .adopter-logos.two-by-two .logo-label {
+      grid-row: 2;
+      align-self: center;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile.logo-square img,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile.logo-zhipu img {
+      width: 108px;
+      height: 108px;
+      max-width: 108px;
+      max-height: 108px;
+      object-fit: contain;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile.logo-zhipu img {
+      object-fit: cover;
+      border-radius: 20px;
+    }
+    .s-adopters-more .logo-tile.logo-china-renaissance img {
+      width: 220px;
+      height: auto;
+      max-width: 220px;
+      max-height: 82px;
+      object-fit: contain;
+    }
+
+    .s-validation .endorse-logo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .s-validation .endorse-logo {
+      height: 76px;
+      min-height: 76px;
+      padding: 10px 18px;
+    }
+    .s-validation .endorse-logo img {
+      max-width: 100%;
+      max-height: 42px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .s-validation .endorse-logo img.logo-nvidia-horizontal { width: 170px; max-height: none; }
+    .s-validation .endorse-logo img.logo-aws { width: 80px; max-height: none; }
+    .s-validation .endorse-logo img.logo-google-cloud { width: 170px; max-height: none; }
+    .s-validation .endorse-talent-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .s-validation .endorse-talent-logo {
+      height: 68px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.82);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 14px;
+      overflow: hidden;
+    }
+    .s-validation .endorse-talent-logo img {
+      max-width: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .s-validation .endorse-talent-logo img.logo-deepseek { width: 150px; }
+    .s-validation .endorse-talent-logo img.logo-qwen { width: 135px; }
+    .s-validation .endorse-talent-logo img.logo-openai { width: 145px; }
+    .s-validation .endorse-talent-logo img.logo-meta { width: 122px; }
+
+    .s-sources .source-logo-wall {
+      column-gap: 14px;
+      row-gap: 24px;
+    }
+    .s-sources .source-logo-cell,
+    .s-sources .source-more-cell {
+      min-height: 50px;
+    }
+    .s-sources .source-logo-cell.logo-product-hunt img {
+      width: 145px;
+      max-width: 145px;
+      max-height: none;
+    }
+    .s-sources .source-logo-cell.logo-huggingface img {
+      width: 140px;
+      max-width: 140px;
+      max-height: none;
+    }
+    .s-sources .source-logo-cell.logo-openreview img {
+      width: 48px;
+      max-width: 48px;
+      max-height: 48px;
+    }
+    /* ==== End English logo parity ==== */
+</style>
 </head>
 <body>
   <div class="deck-shell">
@@ -2287,16 +2558,16 @@
           <div class="adopter-grid">
             <div class="adopter-card">
               <div class="logo-cat-head">Corporate / Technology</div>
-              <div class="adopter-list">ByteDance · JD.com · BOSCH · Sea Group · Klook · XREAL · Tencent · ANT Group</div>
+              <div class="adopter-list">ByteDance · JD.com · BOSCH · Sea Group · Klook · LVMH · Tencent · ANT Group</div>
               <div class="adopter-logos dense">
-                <div class="logo-tile logo-wide"><div class="logo-art"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></div><div class="logo-label">ByteDance</div></div>
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-jdcom.jpeg" alt="JD.com logo"></div><div class="logo-label">JD.com</div></div>
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-bosch.jpeg" alt="BOSCH logo"></div><div class="logo-label">BOSCH</div></div>
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-sea-group.jpeg" alt="Sea Group logo"></div><div class="logo-label">Sea Group</div></div>
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-klook.jpeg" alt="Klook logo"></div><div class="logo-label">Klook</div></div>
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-xreal.jpeg" alt="XREAL logo"></div><div class="logo-label">XREAL</div></div>
-                <div class="logo-tile logo-wide"><div class="logo-art"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></div><div class="logo-label">Tencent</div></div>
-                <div class="logo-tile logo-wide"><div class="logo-art"><img src="../logos/logo-antgroup.jpeg" alt="ANT Group logo"></div><div class="logo-label">ANT Group</div></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></span><span class="logo-label">ByteDance</span></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-jd-official-horizontal.png" alt="JD official horizontal logo"></span><span class="logo-label">JD.com</span></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-bosch-official-horizontal.png" alt="BOSCH official horizontal logo"></span><span class="logo-label">BOSCH</span></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-sea-official-horizontal.png" alt="Sea official horizontal logo"></span><span class="logo-label">Sea Group</span></div>
+                <div class="logo-tile logo-wide logo-klook"><span class="logo-art"><img src="../logos/logo-klook-official-horizontal.svg" alt="Klook official horizontal logo"></span><span class="logo-label">Klook</span></div>
+                <div class="logo-tile logo-wide logo-lvmh"><span class="logo-art"><img src="../logos/logo-lvmh-official.svg" alt="LVMH official logo"></span><span class="logo-label">LVMH</span></div>
+                <div class="logo-tile logo-wide logo-tencent-en"><span class="logo-art"><img src="../logos/logo-tencent-official-english.png" alt="Tencent official English logo"></span><span class="logo-label">Tencent</span></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-antgroup.jpeg" alt="ANT Group logo"></span><span class="logo-label">ANT Group</span></div>
               </div>
             </div>
           </div>
@@ -2325,27 +2596,28 @@
               <div class="logo-cat-head">Specialist Recruiting / Executive Search</div>
               <div class="adopter-list">Huntsor International · TL Talent Advisors</div>
               <div class="adopter-logos">
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-huntsor-international.jpeg" alt="Huntsor International logo"></div><div class="logo-label">Huntsor International</div></div>
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-tl-talent-advisors.jpeg" alt="TL Talent Advisors logo"></div><div class="logo-label">TL Talent Advisors</div></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-huntsor-international.jpeg" alt="Huntsor International logo"><span class="logo-label">Huntsor International</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-tl-talent-advisors.jpeg" alt="TL Talent Advisors logo"><span class="logo-label">TL Talent Advisors</span></div>
               </div>
             </div>
             <div class="adopter-card">
               <div class="logo-cat-head">Artificial Intelligence</div>
-              <div class="adopter-list">Google DeepMind · Zhipu AI · PixVerse</div>
-              <div class="adopter-logos three-up">
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-google-deepmind.jpeg" alt="Google DeepMind logo"></div><div class="logo-label">Google DeepMind</div></div>
-                <div class="logo-tile logo-square logo-zhipu"><div class="logo-art"><img src="../logos/logo-zhipu.jpeg" alt="Zhipu AI logo"></div><div class="logo-label">Zhipu AI</div></div>
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-pixverse.jpeg" alt="PixVerse logo"></div><div class="logo-label">PixVerse</div></div>
+              <div class="adopter-list">Google DeepMind · Zhipu AI · PixVerse · XREAL</div>
+              <div class="adopter-logos two-by-two">
+                <div class="logo-tile logo-square"><img src="../logos/logo-google-deepmind.jpeg" alt="Google DeepMind logo"><span class="logo-label">Google DeepMind</span></div>
+                <div class="logo-tile logo-square logo-zhipu"><img src="../logos/logo-zhipu.jpeg" alt="Zhipu AI logo"><span class="logo-label">Zhipu AI</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-pixverse.jpeg" alt="PixVerse logo"><span class="logo-label">PixVerse</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-xreal.jpeg" alt="XREAL logo"><span class="logo-label">XREAL</span></div>
               </div>
             </div>
             <div class="adopter-card">
               <div class="logo-cat-head">Investment / Academics</div>
               <div class="adopter-list">YZi Labs · China Renaissance · Shunwei Capital · Westlake University</div>
-              <div class="adopter-logos investment-grid">
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-yzi-labs.jpeg" alt="YZi Labs logo"></div><div class="logo-label">YZi Labs</div></div>
-                <div class="logo-tile logo-crop-wide"><div class="logo-art"><img src="../logos/logo-china-renaissance.jpeg" alt="China Renaissance logo"></div><div class="logo-label">China Renaissance</div></div>
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-shunwei-capital.jpeg" alt="Shunwei Capital logo"></div><div class="logo-label">Shunwei Capital</div></div>
-                <div class="logo-tile logo-square"><div class="logo-art"><img src="../logos/logo-westlake-university.jpeg" alt="Westlake University logo"></div><div class="logo-label">Westlake University</div></div>
+              <div class="adopter-logos two-by-two">
+                <div class="logo-tile logo-square"><img src="../logos/logo-yzi-labs.jpeg" alt="YZi Labs logo"><span class="logo-label">YZi Labs</span></div>
+                <div class="logo-tile logo-china-renaissance"><img src="../logos/logo-china-renaissance-official-english.png" alt="China Renaissance official English logo"><span class="logo-label">China Renaissance</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-shunwei-capital.jpeg" alt="Shunwei Capital logo"><span class="logo-label">Shunwei Capital</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-westlake-university.jpeg" alt="Westlake University logo"><span class="logo-label">Westlake University</span></div>
               </div>
             </div>
           </div>
@@ -3050,20 +3322,20 @@
                   <div class="source-logo-cell logo-mark"><img src="../logos/source-x.png" alt="X logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-github.png" alt="GitHub logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-google-scholar.png" alt="Google Scholar logo"></div>
-                  <div class="source-logo-cell logo-mark"><img src="../logos/source-openreview.png" alt="OpenReview logo"></div>
+                  <div class="source-logo-cell logo-mark logo-openreview"><img src="../logos/source-openreview-official.png" alt="OpenReview logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-crunchbase.png" alt="Crunchbase logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-arxiv.png" alt="arXiv logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-university-data.png" alt="University data logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-reddit.png" alt="Reddit logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-pubmed.png" alt="PubMed logo"></div>
-                  <div class="source-logo-cell logo-medium"><img src="../logos/source-product-hunt.png" alt="Product Hunt logo"></div>
+                  <div class="source-logo-cell logo-wide logo-product-hunt"><img src="../logos/source-product-hunt-official-horizontal.png" alt="Product Hunt logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-openalex.png" alt="OpenAlex logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-cvpr.png" alt="CVPR logo"></div>
                   <div class="source-logo-cell logo-mark"><img src="../logos/source-neurips.png" alt="NeurIPS logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-iccv.png" alt="ICCV logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-google-patents.png" alt="Google Patents logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-pitchbook.png" alt="PitchBook logo"></div>
-                  <div class="source-logo-cell logo-medium"><img src="../logos/source-huggingface.svg" alt="Hugging Face logo"></div>
+                  <div class="source-logo-cell logo-wide logo-huggingface"><img src="../logos/source-huggingface-official-horizontal.svg" alt="Hugging Face logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-kaggle.png" alt="Kaggle logo"></div>
                   <div class="source-more-cell"><span class="more-dots">...</span><span class="more-text">More sources<br>coming soon</span></div>
                 </div>
@@ -3298,16 +3570,16 @@
             <div style="display: flex; flex-direction: column; gap: 18px;">
               <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">01 · Global ecosystem programs</div>
               <div class="endorse-logo-grid">
-                <div class="endorse-logo"><img src="../logos/logo-nvidia.svg" alt="NVIDIA logo"></div>
-                <div class="endorse-logo" style="font-size:18px;font-weight:760;color:var(--fg-strong);">AWS</div>
-                <div class="endorse-logo"><img src="../logos/logo-google-cloud.svg" alt="Google Cloud logo"></div>
+                <div class="endorse-logo"><img class="logo-nvidia-horizontal" src="../logos/logo-nvidia-official-horizontal.svg" alt="NVIDIA logo"></div>
+                <div class="endorse-logo"><img class="logo-aws" src="../logos/logo-aws-official.png" alt="AWS logo"></div>
+                <div class="endorse-logo"><img class="logo-google-cloud" src="../logos/logo-google-cloud.svg" alt="Google Cloud logo"></div>
               </div>
               <div style="font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">02 · Top talent onboarded</div>
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">DeepSeek</div>
-                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">Qwen</div>
-                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">OpenAI</div>
-                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">Meta</div>
+              <div class="endorse-talent-grid">
+                <div class="endorse-talent-logo"><img class="logo-deepseek" src="../logos/logo-deepseek-official-horizontal.svg" alt="DeepSeek logo"></div>
+                <div class="endorse-talent-logo"><img class="logo-qwen" src="../logos/logo-qwen-official-horizontal.png" alt="Qwen logo"></div>
+                <div class="endorse-talent-logo"><img class="logo-openai" src="../logos/logo-openai-official-wordmark.svg" alt="OpenAI logo"></div>
+                <div class="endorse-talent-logo"><img class="logo-meta" src="../logos/logo-meta-official-horizontal.svg" alt="Meta logo"></div>
               </div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 20px;">
