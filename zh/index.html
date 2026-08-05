@@ -1128,7 +1128,7 @@
     }
     .s-adopters-enterprise .adopter-logos.dense {
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 42px 56px;
+      gap: 60px 56px;
       margin-top: 42px;
     }
     .s-adopters-enterprise .logo-tile {
@@ -1155,6 +1155,12 @@
     .s-adopters-enterprise .logo-tile.logo-wide img {
       max-width: 310px;
       max-height: 98px;
+    }
+    .s-adopters-enterprise .logo-tile.logo-klook img {
+      width: 300px;
+      height: auto;
+      max-width: 300px;
+      max-height: 90px;
     }
     .s-adopters-enterprise .logo-label {
       font-size: 19px;
@@ -1227,6 +1233,28 @@
       object-fit: cover;
       border-radius: 24px;
     }
+    .s-adopters-more .adopter-logos.two-by-two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+      gap: 14px 28px;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile {
+      height: 150px;
+      justify-content: center;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile.logo-square img,
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile.logo-zhipu img {
+      width: 116px;
+      height: 116px;
+      max-width: 116px;
+      max-height: 116px;
+      object-fit: contain;
+    }
+    .s-adopters.s-adopters-more .adopter-card:nth-child(2) .adopter-logos.two-by-two .logo-tile.logo-zhipu img {
+      object-fit: cover;
+      border-radius: 22px;
+    }
     .endorse-logo-grid {
       display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 14px;
@@ -1238,12 +1266,42 @@
       border-radius: 14px;
       background: rgba(255,255,255,0.82);
       display: flex; align-items: center; justify-content: center;
-      padding: 14px;
+      padding: 10px 18px;
     }
     .endorse-logo img {
       max-width: 100%; max-height: 42px;
       width: auto; height: auto; object-fit: contain; display: block;
     }
+    .endorse-logo img.logo-nvidia-horizontal { width: 170px; max-height: none; }
+    .endorse-logo img.logo-aws { width: 80px; max-height: none; }
+    .endorse-logo img.logo-google-cloud { width: 170px; max-height: none; }
+    .endorse-talent-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .endorse-talent-logo {
+      height: 68px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.82);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 14px;
+      overflow: hidden;
+    }
+    .endorse-talent-logo img {
+      max-width: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .endorse-talent-logo img.logo-deepseek { width: 150px; }
+    .endorse-talent-logo img.logo-qwen { width: 135px; }
+    .endorse-talent-logo img.logo-openai { width: 145px; }
+    .endorse-talent-logo img.logo-meta { width: 122px; }
     .team-logo-row {
       margin-top: auto;
       padding-top: 18px;
@@ -1331,11 +1389,12 @@
       padding-top: 14px;
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 8px 14px;
+      column-gap: 14px;
+      row-gap: 24px;
       align-items: center;
     }
     .source-logo-cell {
-      min-height: 44px;
+      min-height: 50px;
       border: 0;
       border-radius: 0;
       background: transparent;
@@ -1362,8 +1421,23 @@
       max-width: 110px;
       max-height: 38px;
     }
+    .source-logo-cell.logo-product-hunt img {
+      width: 145px;
+      max-width: 145px;
+      max-height: none;
+    }
+    .source-logo-cell.logo-huggingface img {
+      width: 140px;
+      max-width: 140px;
+      max-height: none;
+    }
+    .source-logo-cell.logo-openreview img {
+      width: 48px;
+      max-width: 48px;
+      max-height: 48px;
+    }
     .source-more-cell {
-      min-height: 44px;
+      min-height: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1831,14 +1905,14 @@
           <div class="adopter-grid">
             <div class="adopter-card">
               <div class="logo-cat-head">企业 / 科技</div>
-              <div class="adopter-list">字节跳动 · 京东 · 博世 · 冬海集团 · 客路旅行 · XREAL · 腾讯 · 蚂蚁集团</div>
+              <div class="adopter-list">字节跳动 · 京东 · 博世 · 冬海集团 · 客路旅行 · LVMH · 腾讯 · 蚂蚁集团</div>
               <div class="adopter-logos dense">
                 <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></span><span class="logo-label">字节跳动</span></div>
-                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-jdcom.jpeg" alt="JD.com logo"></span><span class="logo-label">京东</span></div>
-                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-bosch.jpeg" alt="Bosch logo"></span><span class="logo-label">博世</span></div>
-                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-sea-group.jpeg" alt="Sea Group logo"></span><span class="logo-label">冬海集团</span></div>
-                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-klook.jpeg" alt="Klook logo"></span><span class="logo-label">客路旅行</span></div>
-                <div class="logo-tile logo-square"><span class="logo-art"><img src="../logos/logo-xreal.jpeg" alt="XREAL logo"></span><span class="logo-label">XREAL</span></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-jd-official-horizontal.png" alt="京东官方横版 Logo"></span><span class="logo-label">京东</span></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-bosch-official-horizontal.png" alt="Bosch 官方横版 Logo"></span><span class="logo-label">博世</span></div>
+                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-sea-official-horizontal.png" alt="Sea 官方横版 Logo"></span><span class="logo-label">冬海集团</span></div>
+                <div class="logo-tile logo-wide logo-klook"><span class="logo-art"><img src="../logos/logo-klook-official-horizontal.svg" alt="Klook 官方横版 Logo"></span><span class="logo-label">客路旅行</span></div>
+                <div class="logo-tile logo-wide logo-lvmh"><span class="logo-art"><img src="../logos/logo-lvmh-official.svg" alt="LVMH official logo"></span><span class="logo-label">LVMH</span></div>
                 <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></span><span class="logo-label">腾讯</span></div>
                 <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-antgroup.jpeg" alt="Ant Group logo"></span><span class="logo-label">蚂蚁集团</span></div>
               </div>
@@ -1875,11 +1949,12 @@
             </div>
             <div class="adopter-card">
               <div class="logo-cat-head">人工智能</div>
-              <div class="adopter-list">Google DeepMind · 智谱AI · 爱诗科技</div>
-              <div class="adopter-logos three-up">
+              <div class="adopter-list">Google DeepMind · 智谱AI · 爱诗科技 · XREAL</div>
+              <div class="adopter-logos two-by-two">
                 <div class="logo-tile logo-square"><img src="../logos/logo-google-deepmind.jpeg" alt="Google DeepMind logo"><span class="logo-label">Google DeepMind</span></div>
                 <div class="logo-tile logo-square logo-zhipu"><img src="../logos/logo-zhipu.jpeg" alt="Zhipu AI logo"><span class="logo-label">智谱AI</span></div>
                 <div class="logo-tile logo-square"><img src="../logos/logo-pixverse.jpeg" alt="PixVerse logo"><span class="logo-label">爱诗科技</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/logo-xreal.jpeg" alt="XREAL logo"><span class="logo-label">XREAL</span></div>
               </div>
             </div>
             <div class="adopter-card">
@@ -2601,20 +2676,20 @@
                   <div class="source-logo-cell logo-mark"><img src="../logos/source-x.png" alt="X logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-github.png" alt="GitHub logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-google-scholar.png" alt="Google Scholar logo"></div>
-                  <div class="source-logo-cell logo-mark"><img src="../logos/source-openreview.png" alt="OpenReview logo"></div>
+                  <div class="source-logo-cell logo-mark logo-openreview"><img src="../logos/source-openreview-official.png" alt="OpenReview logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-crunchbase.png" alt="Crunchbase logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-arxiv.png" alt="arXiv logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-university-data.png" alt="University data logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-reddit.png" alt="Reddit logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-pubmed.png" alt="PubMed logo"></div>
-                  <div class="source-logo-cell logo-medium"><img src="../logos/source-product-hunt.png" alt="Product Hunt logo"></div>
+                  <div class="source-logo-cell logo-wide logo-product-hunt"><img src="../logos/source-product-hunt-official-horizontal.png" alt="Product Hunt logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-openalex.png" alt="OpenAlex logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-cvpr.png" alt="CVPR logo"></div>
                   <div class="source-logo-cell logo-mark"><img src="../logos/source-neurips.png" alt="NeurIPS logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-iccv.png" alt="ICCV logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-google-patents.png" alt="Google Patents logo"></div>
                   <div class="source-logo-cell logo-wide"><img src="../logos/source-pitchbook.png" alt="PitchBook logo"></div>
-                  <div class="source-logo-cell logo-medium"><img src="../logos/source-huggingface.svg" alt="Hugging Face logo"></div>
+                  <div class="source-logo-cell logo-wide logo-huggingface"><img src="../logos/source-huggingface-official-horizontal.svg" alt="Hugging Face logo"></div>
                   <div class="source-logo-cell logo-medium"><img src="../logos/source-kaggle.png" alt="Kaggle logo"></div>
                   <div class="source-more-cell"><span class="more-dots">...</span><span class="more-text">更多数据源<br>持续接入</span></div>
                 </div>
@@ -2870,16 +2945,16 @@
             <div style="display: flex; flex-direction: column; gap: 18px;">
               <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">01 · 全球顶级孵化器成员</div>
               <div class="endorse-logo-grid">
-                <div class="endorse-logo"><img src="../logos/logo-nvidia.svg" alt="NVIDIA logo"></div>
-                <div class="endorse-logo" style="font-size:18px;font-weight:760;color:var(--fg-strong);">AWS</div>
-                <div class="endorse-logo"><img src="../logos/logo-google-cloud.svg" alt="Google Cloud logo"></div>
+                <div class="endorse-logo"><img class="logo-nvidia-horizontal" src="../logos/logo-nvidia-official-horizontal.svg" alt="NVIDIA logo"></div>
+                <div class="endorse-logo"><img class="logo-aws" src="../logos/logo-aws-official.png" alt="AWS logo"></div>
+                <div class="endorse-logo"><img class="logo-google-cloud" src="../logos/logo-google-cloud.svg" alt="Google Cloud logo"></div>
               </div>
               <div style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase;">02 · 顶尖人才入驻</div>
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">DeepSeek</div>
-                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">Qwen</div>
-                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">OpenAI</div>
-                <div style="height:68px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,0.82);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:760;color:var(--fg-strong);">Meta</div>
+              <div class="endorse-talent-grid">
+                <div class="endorse-talent-logo"><img class="logo-deepseek" src="../logos/logo-deepseek-official-horizontal.svg" alt="DeepSeek logo"></div>
+                <div class="endorse-talent-logo"><img class="logo-qwen" src="../logos/logo-qwen-official-horizontal.png" alt="Qwen logo"></div>
+                <div class="endorse-talent-logo"><img class="logo-openai" src="../logos/logo-openai-official-wordmark.svg" alt="OpenAI logo"></div>
+                <div class="endorse-talent-logo"><img class="logo-meta" src="../logos/logo-meta-official-horizontal.svg" alt="Meta logo"></div>
               </div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 20px;">
