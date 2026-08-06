@@ -1179,24 +1179,31 @@
       justify-content: center;
       flex: 0 0 114px;
     }
-    .s-adopters-enterprise .logo-tile img {
-      max-width: 290px;
-      max-height: 110px;
+    /*
+      Enterprise logo normalization:
+      - every mark sits in the same 364 × 114 px stage;
+      - labels share a fixed baseline;
+      - per-brand widths compensate for aspect ratio and transparent padding,
+        targeting a comparable optical footprint without distorting the artwork.
+    */
+    .s-adopters-enterprise .logo-tile {
+      --logo-width: 280px;
     }
-    .s-adopters-enterprise .logo-tile.logo-square img {
-      max-width: 142px;
-      max-height: 112px;
-    }
-    .s-adopters-enterprise .logo-tile.logo-wide img {
-      max-width: 310px;
-      max-height: 98px;
-    }
-    .s-adopters-enterprise .logo-tile.logo-klook img {
-      width: 300px;
+    .s-adopters-enterprise .logo-tile .logo-art img {
+      width: var(--logo-width);
       height: auto;
-      max-width: 300px;
-      max-height: 90px;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
     }
+    .s-adopters-enterprise .logo-bytedance { --logo-width: 310px; }
+    .s-adopters-enterprise .logo-deepmind { --logo-width: 360px; }
+    .s-adopters-enterprise .logo-bosch { --logo-width: 270px; }
+    .s-adopters-enterprise .logo-sea { --logo-width: 214px; }
+    .s-adopters-enterprise .logo-klook { --logo-width: 245px; }
+    .s-adopters-enterprise .logo-lvmh { --logo-width: 260px; }
+    .s-adopters-enterprise .logo-tencent { --logo-width: 350px; }
+    .s-adopters-enterprise .logo-ant { --logo-width: 198px; }
     .s-adopters-enterprise .logo-label {
       font-size: 19px;
       font-weight: 700;
@@ -1957,16 +1964,16 @@
           <div class="adopter-grid">
             <div class="adopter-card">
               <div class="logo-cat-head">企业 / 科技</div>
-              <div class="adopter-list">字节跳动 · 京东 · 博世 · 冬海集团 · 客路旅行 · LVMH · 腾讯 · 蚂蚁集团</div>
+              <div class="adopter-list">字节跳动 · Google DeepMind · 博世 · 冬海集团 · 客路旅行 · LVMH · 腾讯 · 蚂蚁集团</div>
               <div class="adopter-logos dense">
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></span><span class="logo-label">字节跳动</span></div>
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-jd-official-horizontal.png" alt="京东官方横版 Logo"></span><span class="logo-label">京东</span></div>
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-bosch-official-horizontal.png" alt="Bosch 官方横版 Logo"></span><span class="logo-label">博世</span></div>
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-sea-official-horizontal.png" alt="Sea 官方横版 Logo"></span><span class="logo-label">冬海集团</span></div>
+                <div class="logo-tile logo-wide logo-bytedance"><span class="logo-art"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></span><span class="logo-label">字节跳动</span></div>
+                <div class="logo-tile logo-wide logo-deepmind"><span class="logo-art"><img src="../logos/logo-google-deepmind-official-horizontal.svg" alt="Google DeepMind 官方横版 Logo"></span><span class="logo-label">Google DeepMind</span></div>
+                <div class="logo-tile logo-wide logo-bosch"><span class="logo-art"><img src="../logos/logo-bosch-official-horizontal.png" alt="Bosch 官方横版 Logo"></span><span class="logo-label">博世</span></div>
+                <div class="logo-tile logo-wide logo-sea"><span class="logo-art"><img src="../logos/logo-sea-official-horizontal.png" alt="Sea 官方横版 Logo"></span><span class="logo-label">冬海集团</span></div>
                 <div class="logo-tile logo-wide logo-klook"><span class="logo-art"><img src="../logos/logo-klook-official-horizontal.svg" alt="Klook 官方横版 Logo"></span><span class="logo-label">客路旅行</span></div>
                 <div class="logo-tile logo-wide logo-lvmh"><span class="logo-art"><img src="../logos/logo-lvmh-official.svg" alt="LVMH official logo"></span><span class="logo-label">LVMH</span></div>
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></span><span class="logo-label">腾讯</span></div>
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-antgroup.jpeg" alt="Ant Group logo"></span><span class="logo-label">蚂蚁集团</span></div>
+                <div class="logo-tile logo-wide logo-tencent"><span class="logo-art"><img src="../logos/logo-tencent.svg" alt="Tencent logo"></span><span class="logo-label">腾讯</span></div>
+                <div class="logo-tile logo-wide logo-ant"><span class="logo-art"><img src="../logos/logo-antgroup.jpeg" alt="Ant Group logo"></span><span class="logo-label">蚂蚁集团</span></div>
               </div>
             </div>
           </div>
@@ -2001,9 +2008,9 @@
             </div>
             <div class="adopter-card">
               <div class="logo-cat-head">人工智能</div>
-              <div class="adopter-list">Google DeepMind · 智谱AI · 爱诗科技 · XREAL</div>
+              <div class="adopter-list">阶跃星辰 · 智谱AI · 爱诗科技 · XREAL</div>
               <div class="adopter-logos two-by-two">
-                <div class="logo-tile logo-square"><img src="../logos/logo-google-deepmind.jpeg" alt="Google DeepMind logo"><span class="logo-label">Google DeepMind</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/stepfun_ai_logo.jpeg" alt="阶跃星辰 Logo"><span class="logo-label">阶跃星辰</span></div>
                 <div class="logo-tile logo-square logo-zhipu"><img src="../logos/logo-zhipu.jpeg" alt="Zhipu AI logo"><span class="logo-label">智谱AI</span></div>
                 <div class="logo-tile logo-square"><img src="../logos/logo-pixverse.jpeg" alt="PixVerse logo"><span class="logo-label">爱诗科技</span></div>
                 <div class="logo-tile logo-square"><img src="../logos/logo-xreal.jpeg" alt="XREAL logo"><span class="logo-label">XREAL</span></div>

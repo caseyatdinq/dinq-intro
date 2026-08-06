@@ -2138,22 +2138,30 @@
       align-items: center;
       justify-content: center;
     }
-    .s-adopters-enterprise .logo-tile.logo-wide img {
-      max-width: 310px;
-      max-height: 98px;
+    /*
+      One shared optical system for the eight enterprise marks:
+      fixed art stage and label baseline, preserved aspect ratio, and
+      per-brand width tokens calibrated to comparable visible ink area.
+    */
+    .s-adopters-enterprise .logo-tile {
+      --logo-width: 280px;
     }
-    .s-adopters-enterprise .logo-tile.logo-klook img {
-      width: 300px;
+    .s-adopters-enterprise .logo-tile .logo-art img {
+      width: var(--logo-width);
       height: auto;
-      max-width: 300px;
-      max-height: 90px;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
     }
-    .s-adopters-enterprise .logo-tile.logo-tencent-en img {
-      width: 300px;
-      height: auto;
-      max-width: 300px;
-      max-height: 96px;
-    }
+    .s-adopters-enterprise .logo-bytedance { --logo-width: 310px; }
+    .s-adopters-enterprise .logo-deepmind { --logo-width: 360px; }
+    .s-adopters-enterprise .logo-bosch { --logo-width: 270px; }
+    .s-adopters-enterprise .logo-sea { --logo-width: 214px; }
+    .s-adopters-enterprise .logo-klook { --logo-width: 245px; }
+    .s-adopters-enterprise .logo-lvmh { --logo-width: 260px; }
+    .s-adopters-enterprise .logo-tencent-en { --logo-width: 325px; }
+    .s-adopters-enterprise .logo-tencent-en .logo-art img { max-height: none; }
+    .s-adopters-enterprise .logo-ant { --logo-width: 198px; }
     .s-adopters-enterprise .logo-label,
     .s-adopters-more .logo-label {
       font-size: 18px;
@@ -2593,16 +2601,16 @@
           <div class="adopter-grid">
             <div class="adopter-card">
               <div class="logo-cat-head">Corporate / Technology</div>
-              <div class="adopter-list">ByteDance · JD.com · BOSCH · Sea Group · Klook · LVMH · Tencent · ANT Group</div>
+              <div class="adopter-list">ByteDance · Google DeepMind · BOSCH · Sea Group · Klook · LVMH · Tencent · ANT Group</div>
               <div class="adopter-logos dense">
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></span><span class="logo-label">ByteDance</span></div>
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-jd-official-horizontal.png" alt="JD official horizontal logo"></span><span class="logo-label">JD.com</span></div>
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-bosch-official-horizontal.png" alt="BOSCH official horizontal logo"></span><span class="logo-label">BOSCH</span></div>
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-sea-official-horizontal.png" alt="Sea official horizontal logo"></span><span class="logo-label">Sea Group</span></div>
+                <div class="logo-tile logo-wide logo-bytedance"><span class="logo-art"><img src="../logos/logo-bytedance.svg" alt="ByteDance logo"></span><span class="logo-label">ByteDance</span></div>
+                <div class="logo-tile logo-wide logo-deepmind"><span class="logo-art"><img src="../logos/logo-google-deepmind-official-horizontal.svg" alt="Google DeepMind official horizontal logo"></span><span class="logo-label">Google DeepMind</span></div>
+                <div class="logo-tile logo-wide logo-bosch"><span class="logo-art"><img src="../logos/logo-bosch-official-horizontal.png" alt="BOSCH official horizontal logo"></span><span class="logo-label">BOSCH</span></div>
+                <div class="logo-tile logo-wide logo-sea"><span class="logo-art"><img src="../logos/logo-sea-official-horizontal.png" alt="Sea official horizontal logo"></span><span class="logo-label">Sea Group</span></div>
                 <div class="logo-tile logo-wide logo-klook"><span class="logo-art"><img src="../logos/logo-klook-official-horizontal.svg" alt="Klook official horizontal logo"></span><span class="logo-label">Klook</span></div>
                 <div class="logo-tile logo-wide logo-lvmh"><span class="logo-art"><img src="../logos/logo-lvmh-official.svg" alt="LVMH official logo"></span><span class="logo-label">LVMH</span></div>
                 <div class="logo-tile logo-wide logo-tencent-en"><span class="logo-art"><img src="../logos/logo-tencent-official-english.png" alt="Tencent official English logo"></span><span class="logo-label">Tencent</span></div>
-                <div class="logo-tile logo-wide"><span class="logo-art"><img src="../logos/logo-antgroup.jpeg" alt="ANT Group logo"></span><span class="logo-label">ANT Group</span></div>
+                <div class="logo-tile logo-wide logo-ant"><span class="logo-art"><img src="../logos/logo-antgroup.jpeg" alt="ANT Group logo"></span><span class="logo-label">ANT Group</span></div>
               </div>
             </div>
           </div>
@@ -2637,9 +2645,9 @@
             </div>
             <div class="adopter-card">
               <div class="logo-cat-head">Artificial Intelligence</div>
-              <div class="adopter-list">Google DeepMind · Zhipu AI · PixVerse · XREAL</div>
+              <div class="adopter-list">StepFun · Zhipu AI · PixVerse · XREAL</div>
               <div class="adopter-logos two-by-two">
-                <div class="logo-tile logo-square"><img src="../logos/logo-google-deepmind.jpeg" alt="Google DeepMind logo"><span class="logo-label">Google DeepMind</span></div>
+                <div class="logo-tile logo-square"><img src="../logos/stepfun_ai_logo.jpeg" alt="StepFun logo"><span class="logo-label">StepFun</span></div>
                 <div class="logo-tile logo-square logo-zhipu"><img src="../logos/logo-zhipu.jpeg" alt="Zhipu AI logo"><span class="logo-label">Zhipu AI</span></div>
                 <div class="logo-tile logo-square"><img src="../logos/logo-pixverse.jpeg" alt="PixVerse logo"><span class="logo-label">PixVerse</span></div>
                 <div class="logo-tile logo-square"><img src="../logos/logo-xreal.jpeg" alt="XREAL logo"><span class="logo-label">XREAL</span></div>
