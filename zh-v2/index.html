@@ -174,7 +174,7 @@ body{font-family:GeistSans,'Noto Sans SC',sans-serif;line-height:1.55;font-size:
 .slide .cards-grid{grid-template-columns:repeat(3,1fr);gap:28px;margin-top:38px}
 .slide .card{border-radius:20px;padding:32px 34px;box-shadow:0 14px 45px rgba(42,40,38,.05)}
 .slide#modes .mode-card{position:relative;cursor:pointer;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;outline:none}
-.slide#modes .mode-card::after{content:'↗';position:absolute;right:24px;top:24px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:700;color:var(--terracotta);background:rgba(215,119,86,.10);border:1px solid rgba(215,119,86,.24);transition:background .22s ease,color .22s ease,transform .22s ease}
+.slide#modes .mode-card::after{content:'点击查看  ↗';position:absolute;right:24px;top:24px;height:36px;padding:0 13px;border-radius:999px;display:grid;place-items:center;font-family:GeistMono,monospace;font-size:11px;font-weight:750;letter-spacing:.5px;color:var(--terracotta);background:rgba(215,119,86,.10);border:1px solid rgba(215,119,86,.24);transition:background .22s ease,color .22s ease,transform .22s ease}
 .slide#modes .mode-card:hover,.slide#modes .mode-card:focus-visible{transform:translateY(-7px);border-color:rgba(215,119,86,.55);box-shadow:0 22px 55px rgba(82,53,42,.12)}
 .slide#modes .mode-card:hover::after,.slide#modes .mode-card:focus-visible::after{color:#fff;background:var(--terracotta);transform:translate(2px,-2px)}
 .slide .card-icon{width:52px;height:52px;border-radius:14px;font-size:24px;margin-bottom:18px}
@@ -271,22 +271,18 @@ body{font-family:GeistSans,'Noto Sans SC',sans-serif;line-height:1.55;font-size:
 .slide#api .api-video-frame::before{content:'API PLAYGROUND';position:absolute;left:27px;top:25px;z-index:2;padding:7px 12px;border-radius:999px;background:rgba(23,22,20,.74);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.88);font-family:GeistMono,monospace;font-size:11px;letter-spacing:1.3px;pointer-events:none;backdrop-filter:blur(8px)}
 .slide#api .api-video{display:block;width:100%;height:100%;object-fit:contain;border-radius:15px;background:#f5f3ef}
 .slide#api .api-caption{margin-top:12px;text-align:center;font-size:14px;color:var(--text-muted)}
-.slide#radar .radar-layout{display:grid;grid-template-columns:970px 620px;gap:58px;align-items:start;margin-top:34px}
-.slide#radar .radar-video-frame{height:590px;padding:7px;border:1px solid rgba(215,119,86,.22);border-radius:22px;background:#f5f3ef;box-shadow:0 24px 65px rgba(42,40,38,.14);overflow:hidden}
+.slide#radar .radar-layout{display:grid;grid-template-columns:1.22fr .78fr;grid-template-rows:auto 500px;gap:22px 34px;align-items:start;margin-top:26px}
+.slide#radar .radar-flow{grid-column:1 / -1;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.slide#radar .radar-flow-step{display:grid;grid-template-columns:38px 1fr;gap:12px;align-items:center;padding:13px 16px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.82)}
+.slide#radar .radar-flow-index{font-family:GeistMono,monospace;font-size:13px;font-weight:800;color:var(--terracotta)}
+.slide#radar .radar-flow-step strong{display:block;font-size:17px;line-height:1.25;color:var(--text-primary)}
+.slide#radar .radar-flow-step span{display:block;margin-top:2px;font-size:13px;line-height:1.35;color:var(--text-secondary)}
+.slide#radar .radar-video-frame{height:500px;padding:7px;border:1px solid rgba(215,119,86,.22);border-radius:22px;background:#f5f3ef;box-shadow:0 24px 65px rgba(42,40,38,.14);overflow:hidden}
 .slide#radar .radar-video{display:block;width:100%;height:100%;object-fit:contain;border-radius:14px;background:#f5f3ef}
 .slide#radar .radar-caption{margin-top:12px;text-align:center;font-size:14px;color:var(--text-muted)}
-.slide#radar .radar-copy{padding-top:2px;text-align:left}
-.slide#radar .radar-copy .section-title{font-size:54px;line-height:1.08;margin-bottom:18px}
-.slide#radar .radar-copy .section-subtitle{font-size:22px;line-height:1.5;margin-bottom:26px}
-.slide#radar .radar-steps{border-top:1px solid var(--border)}
-.slide#radar .radar-step{display:grid;grid-template-columns:46px 1fr;grid-template-rows:auto auto;column-gap:14px;padding:19px 0;border-bottom:1px solid var(--border)}
-.slide#radar .radar-step-index{grid-row:1 / span 2;padding-top:3px;font-family:GeistMono,monospace;font-size:14px;font-weight:800;color:var(--terracotta)}
-.slide#radar .radar-step-title{font-size:21px;font-weight:760;color:var(--text-primary);margin-bottom:4px}
-.slide#radar .radar-step-copy{font-size:16px;line-height:1.45;color:var(--text-secondary)}
-.slide#radar .radar-modes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
-.slide#radar .radar-mode{padding:15px 16px;border:1px solid rgba(215,119,86,.22);border-radius:14px;background:rgba(215,119,86,.07)}
-.slide#radar .radar-mode strong{display:block;font-size:17px;color:var(--text-primary);margin-bottom:4px}
-.slide#radar .radar-mode span{font-size:14px;line-height:1.4;color:var(--text-secondary)}
+.slide#radar .radar-result{position:relative;height:500px;padding:7px;border:1px solid rgba(215,119,86,.3);border-radius:22px;background:#f5f3ef;box-shadow:0 24px 65px rgba(42,40,38,.14);overflow:visible}
+.slide#radar .radar-result img{display:block;width:100%;height:100%;object-fit:contain;object-position:center top;border-radius:14px;background:#fff}
+.slide#radar .radar-result-badge{position:absolute;left:50%;bottom:-46px;z-index:2;transform:translateX(-50%);padding:9px 15px;border-radius:999px;background:var(--terracotta);box-shadow:0 8px 24px rgba(42,40,38,.14);font-family:GeistMono,monospace;font-size:12px;font-weight:750;letter-spacing:.8px;color:#fff;white-space:nowrap}
 .slide#integration .integration-layout{display:grid;grid-template-columns:1040px 520px;gap:50px;align-items:start;margin-top:28px}
 .slide#integration .integration-visual{min-width:0}
 .slide#integration .integration-image-frame{height:610px;padding:7px;border:1px solid rgba(215,119,86,.22);border-radius:22px;background:#f6f4f1;box-shadow:0 24px 65px rgba(42,40,38,.14);overflow:hidden}
@@ -362,7 +358,13 @@ body{font-family:GeistSans,'Noto Sans SC',sans-serif;line-height:1.55;font-size:
 .slide#cases .solution-step span{font-size:15px;line-height:1.45;color:var(--text-primary)}
 .slide#cases .evidence-label{font-size:13px;font-weight:750;color:var(--text-secondary);margin:12px 0 9px}
 .slide#cases .evidence-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.slide#cases .evidence-chip{padding:9px 10px;border:1px solid var(--border);border-radius:11px;background:#faf9f7;font-size:11px;color:var(--text-primary)}
+.slide#cases .evidence-chip{position:relative;padding:9px 10px 9px 25px;border:1px solid var(--border);border-radius:11px;background:#faf9f7;font-size:11px;color:var(--text-primary);opacity:0;transform:translateY(10px)}
+.slide#cases .evidence-chip::before{content:'';position:absolute;left:10px;top:50%;width:7px;height:7px;border-radius:50%;background:var(--terracotta);transform:translateY(-50%);box-shadow:0 0 0 4px rgba(215,119,86,.11)}
+.slide#cases.active .solution-step{animation:evidenceReveal .42s both}
+.slide#cases.active .solution-step:nth-child(2){animation-delay:.12s}.slide#cases.active .solution-step:nth-child(3){animation-delay:.24s}
+.slide#cases.active .evidence-chip{animation:evidenceReveal .42s both}
+.slide#cases.active .evidence-chip:nth-child(1){animation-delay:.34s}.slide#cases.active .evidence-chip:nth-child(2){animation-delay:.43s}.slide#cases.active .evidence-chip:nth-child(3){animation-delay:.52s}.slide#cases.active .evidence-chip:nth-child(4){animation-delay:.61s}.slide#cases.active .evidence-chip:nth-child(5){animation-delay:.70s}.slide#cases.active .evidence-chip:nth-child(6){animation-delay:.79s}
+@keyframes evidenceReveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .slide#cases .result-numbers{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
 .slide#cases .result-number{padding:12px 8px;border-radius:12px;background:rgba(58,53,49,.055)}
 .slide#cases .result-number strong{display:block;font-family:GeistMono,monospace;font-size:24px;line-height:1;color:var(--terracotta);margin-bottom:5px}
@@ -552,7 +554,7 @@ body{font-family:GeistSans,'Noto Sans SC',sans-serif;line-height:1.55;font-size:
 .slide#team .section-title{font-size:62px;line-height:1.05;margin-bottom:10px}
 .slide#team .section-subtitle{font-size:21px;max-width:1280px}
 .slide#team .team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:31px}
-.slide#team .team-card{position:relative;min-height:438px;padding:28px 28px 24px;border:1px solid var(--border);border-radius:20px;background:rgba(255,255,255,.9);box-shadow:0 18px 52px rgba(42,40,38,.045);overflow:hidden}
+.slide#team .team-card{position:relative;min-height:458px;padding:28px 28px 24px;border:1px solid var(--border);border-radius:20px;background:rgba(255,255,255,.9);box-shadow:0 18px 52px rgba(42,40,38,.045);overflow:hidden}
 .slide#team .team-card::before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:var(--terracotta)}
 .slide#team .team-head{display:flex;align-items:center;gap:15px;padding-bottom:20px;border-bottom:1px solid var(--border)}
 .slide#team .team-initials{display:flex;align-items:center;justify-content:center;width:54px;height:54px;flex:0 0 54px;border-radius:13px;background:rgba(215,119,86,.09);border:1px solid rgba(215,119,86,.24);font-family:GeistMono,monospace;font-size:17px;font-weight:760;color:var(--terracotta)}
@@ -560,6 +562,10 @@ body{font-family:GeistSans,'Noto Sans SC',sans-serif;line-height:1.55;font-size:
 .slide#team .team-role{margin-top:6px;font-family:GeistMono,monospace;font-size:11px;font-weight:720;letter-spacing:1.2px;color:var(--terracotta)}
 .slide#team .team-bio{margin-top:20px;font-size:15px;line-height:1.65;color:var(--text-secondary)}
 .slide#team .team-highlight{margin-top:18px;padding:13px 14px;border-radius:12px;background:var(--warm-white);font-size:13px;font-weight:650;line-height:1.45;color:var(--text-primary)}
+.slide#team .team-achievements{display:flex;flex-direction:column;gap:14px;margin:23px 0 0;padding:0;list-style:none}
+.slide#team .team-achievements li{position:relative;padding-left:21px;font-size:17px;font-weight:560;line-height:1.48;color:var(--text-secondary)}
+.slide#team .team-achievements li::before{content:'';position:absolute;left:0;top:10px;width:8px;height:8px;border-radius:2px;background:var(--terracotta);box-shadow:0 0 0 4px rgba(215,119,86,.10)}
+.slide#team .team-achievements strong{color:var(--text-primary);font-weight:760}
 .slide#team .team-logos{position:absolute;left:28px;right:28px;bottom:24px;display:flex;align-items:center;gap:18px;padding-top:18px;border-top:1px solid var(--border)}
 .slide#team .team-logos img{display:block;max-width:125px;height:36px;object-fit:contain;object-position:left center;filter:saturate(.88)}
 .slide#team .team-logos img.square{width:38px;height:38px}
@@ -1108,7 +1114,14 @@ AI NATIVE TALENT SEARCH · 产品介绍
 <section class="section" id="radar">
 <div class="section-inner">
 <div class="eyebrow">4.6 · 人才雷达</div>
+<h2 class="section-title">持续发现，而非一次搜索</h2>
+<p class="section-subtitle">将单次搜索升级为 7×24 小时人才监测，并把新增匹配自动送达收件箱</p>
 <div class="radar-layout">
+<div class="radar-flow">
+<div class="radar-flow-step fade-in"><div class="radar-flow-index">01</div><div><strong>创建人才雷达</strong><span>自然语言描述目标，30 秒启动</span></div></div>
+<div class="radar-flow-step fade-in"><div class="radar-flow-index">02</div><div><strong>持续扫描全网</strong><span>按设定频率检索 500+ 公开数据源</span></div></div>
+<div class="radar-flow-step fade-in"><div class="radar-flow-index">03</div><div><strong>自动推送新增匹配</strong><span>候选人去重、评分，并定期发送结果邮件</span></div></div>
+</div>
 <div class="radar-media">
 <div class="radar-video-frame">
 <video class="radar-video" data-slide-autoplay muted loop controls playsinline preload="metadata" poster="images/image11_1.png">
@@ -1117,15 +1130,9 @@ AI NATIVE TALENT SEARCH · 产品介绍
 </div>
 <div class="radar-caption">TALENT RADAR · 持续扫描与新增匹配推送</div>
 </div>
-<div class="radar-copy">
-<h2 class="section-title">持续发现，<br>而非一次搜索</h2>
-<p class="section-subtitle">将单次搜索升级为 7×24 小时人才监测</p>
-<div class="radar-steps">
-<div class="radar-step fade-in"><div class="radar-step-index">01</div><div class="radar-step-title">创建人才雷达</div><div class="radar-step-copy">用自然语言描述目标人才，30 秒启动</div></div>
-<div class="radar-step fade-in"><div class="radar-step-index">02</div><div class="radar-step-title">持续扫描全网</div><div class="radar-step-copy">按设定频率检索 500+ 公开数据源</div></div>
-<div class="radar-step fade-in"><div class="radar-step-index">03</div><div class="radar-step-title">自动推送新增匹配</div><div class="radar-step-copy">候选人自动去重并进入收件箱，随时转化为触达</div></div>
-</div>
-<div class="radar-modes"><div class="radar-mode"><strong>人才搜索</strong><span>持续发现新候选人</span></div><div class="radar-mode"><strong>候选人追踪</strong><span>监测职业与成果变化</span></div></div>
+<div class="radar-result">
+<div class="radar-result-badge">每周自动推送 · <span class="count-up" data-count="19">19</span> 位新候选人</div>
+<img src="images/talent-radar-email-result.png" alt="DINQ 人才雷达新增候选人邮件推送结果">
 </div>
 </div>
 </div>
@@ -1342,7 +1349,6 @@ AI NATIVE TALENT SEARCH · 产品介绍
 </div>
 </div>
 </div>
-<div class="package-cta"><div class="package-cta-copy"><strong>现在就用一个真实岗位开始</strong><span>注册后输入邀请码，直接体验 DINQ 人才搜索</span></div><div class="invite-code">USEDINQ</div><a class="package-button" href="https://dinq.me" target="_blank">立即体验 →</a></div>
 <div class="package-source">方案与 Credits 数据依据 DINQ 官方《定价与 Credit》文档，更新于 2026-08-21</div>
 </div>
 </section>
@@ -1354,11 +1360,10 @@ AI NATIVE TALENT SEARCH · 产品介绍
 <h2 class="section-title">核心团队：<br>AI 社区深耕 × 企业服务经验</h2>
 <p class="section-subtitle">融合开源技术影响力、人才基础设施建设与全球人才市场战略视野</p>
 <div class="team-grid">
-<article class="team-card"><div class="team-head"><div class="team-initials">SG</div><div><div class="team-name">高岱恒 Sam Gao</div><div class="team-role">创始人 & CEO</div></div></div><div class="team-bio">中科大博士，前阿里达摩院研究员，AI 开源社区知名贡献者；长期推动技术社区、研究者网络与 AI 产品生态建设。</div><div class="team-highlight">DeepFaceLab 曾位列 GitHub 全球 Top 2 项目；运营 2 万+ 中文 AI 研究者社区</div><div class="team-logos"><img src="images/logos/logo-damo-academy.webp" alt="阿里达摩院"></div></article>
-<article class="team-card"><div class="team-head"><div class="team-initials">KS</div><div><div class="team-name">孙辰昕 Kelvin Sun</div><div class="team-role">联合创始人</div></div></div><div class="team-bio">悉尼大学硕士，招聘基础设施赛道连续创业者；曾任职红杉资本、光源资本人力资源管理，深耕人才系统与组织能力建设。</div><div class="team-highlight">兼具人才基础设施产品经验与 B2B SaaS 商业化、规模化运营能力</div><div class="team-logos"><img src="images/logos/logo-hongshan.png" alt="红杉中国"><img src="images/logos/logo-thomson-reuters.png" alt="Thomson Reuters"></div></article>
-<article class="team-card"><div class="team-head"><div class="team-initials">JL</div><div><div class="team-name">陆坚 Jian Lu</div><div class="team-role">战略顾问</div></div></div><div class="team-bio">达特茅斯博士，前领英中国区总裁、CGL 全球首席咨询合伙人；清华苏世民学院导师，拥有全球人才市场战略视野与行业资源。</div><div class="team-highlight">连接全球人才市场、企业招聘战略与高端专业服务网络</div><div class="team-logos"><img class="square" src="images/logos/logo-cgl.jpeg" alt="CGL"><img class="square" src="images/logos/logo-linkedin.svg" alt="LinkedIn"></div></article>
+<article class="team-card"><div class="team-head"><div class="team-initials">SG</div><div><div class="team-name">高岱恒 Sam Gao</div><div class="team-role">创始人 & CEO</div></div></div><ul class="team-achievements"><li><strong>中科大博士</strong>，前阿里达摩院研究员</li><li>开源项目 <strong>DeepFaceLab</strong> 曾位列 GitHub 全球 Top 2</li><li>运营 <strong>2 万+ 中文 AI 研究者社区</strong></li></ul><div class="team-logos"><img src="images/logos/logo-damo-academy.webp" alt="阿里达摩院"></div></article>
+<article class="team-card"><div class="team-head"><div class="team-initials">KS</div><div><div class="team-name">孙辰昕 Kelvin Sun</div><div class="team-role">联合创始人</div></div></div><ul class="team-achievements"><li><strong>悉尼大学硕士</strong>，招聘基础设施连续创业者</li><li>曾任职<strong>红杉资本、光源资本</strong>人力资源管理</li><li>兼具人才产品、<strong>B2B SaaS 商业化与规模化运营</strong>经验</li></ul><div class="team-logos"><img src="images/logos/logo-hongshan.png" alt="红杉中国"><img src="images/logos/logo-thomson-reuters.png" alt="Thomson Reuters"></div></article>
+<article class="team-card"><div class="team-head"><div class="team-initials">JL</div><div><div class="team-name">陆坚 Jian Lu</div><div class="team-role">战略顾问</div></div></div><ul class="team-achievements"><li><strong>达特茅斯博士</strong>，前领英中国区总裁</li><li><strong>CGL 全球首席咨询合伙人</strong>、清华苏世民学院导师</li><li>连接全球人才市场、企业招聘战略与<strong>高端专业服务网络</strong></li></ul><div class="team-logos"><img class="square" src="images/logos/logo-cgl.jpeg" alt="CGL"><img class="square" src="images/logos/logo-linkedin.svg" alt="LinkedIn"></div></article>
 </div>
-<div class="team-summary"><strong>技术 × 产品 × 市场</strong><span>既理解 AI 技术贡献如何被发现，也理解企业招聘团队如何采购、部署并规模化使用人才基础设施</span></div>
 </div>
 </section>
 
@@ -1516,10 +1521,15 @@ class SlidePresentation{
     addEventListener('wheel',e=>{if(this.wheelLocked||Math.abs(e.deltaY)<20)return;this.wheelLocked=true;this.showSlide(this.current+(e.deltaY>0?1:-1));setTimeout(()=>this.wheelLocked=false,520)},{passive:true});
   }
   showSlide(index){
-    this.current=Math.max(0,Math.min(index,this.slides.length-1));
+    this.current=((index%this.slides.length)+this.slides.length)%this.slides.length;
     this.slides.forEach((slide,i)=>{const on=i===this.current;slide.classList.toggle('active',on);slide.classList.toggle('visible',on)});
+    this.animateCounters(this.slides[this.current]);
     this.slides.forEach((slide,i)=>{slide.querySelectorAll('video').forEach(video=>{if(i!==this.current){video.pause();return}if(video.matches('[data-slide-autoplay]')){video.playbackRate=Number(video.dataset.playbackRate)||1;video.play().catch(()=>{})}})});
     this.counter.textContent=`${String(this.current+1).padStart(2,'0')} / ${String(this.slides.length).padStart(2,'0')}`;this.progress.style.width=`${(this.current+1)/this.slides.length*100}%`;history.replaceState(null,'',`#${this.current+1}`);
+  }
+  animateCounters(slide){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    slide.querySelectorAll('.count-up[data-count]').forEach(el=>{const target=Number(el.dataset.count)||1,startValue=1,start=performance.now(),duration=6000;el.textContent=String(startValue);const tick=now=>{const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);el.textContent=String(Math.round(startValue+(target-startValue)*ease));if(t<1)requestAnimationFrame(tick)};requestAnimationFrame(tick)})
   }
   toggleFullscreen(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}
   downloadHtml(){const blob=new Blob(['<!DOCTYPE html>\n'+document.documentElement.outerHTML],{type:'text/html'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='DINQ-frontend-slides-edited.html';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000)}
